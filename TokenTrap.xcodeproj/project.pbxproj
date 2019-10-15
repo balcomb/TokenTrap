@@ -7,13 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B5851EE42353BA4D006A0CD9 /* UIExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5851EE32353BA4D006A0CD9 /* UIExtension.swift */; };
 		B5DBB35A2352627700C971FC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DBB3592352627700C971FC /* AppDelegate.swift */; };
 		B5DBB35C2352627700C971FC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DBB35B2352627700C971FC /* SceneDelegate.swift */; };
-		B5DBB35E2352627700C971FC /* ViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DBB35D2352627700C971FC /* ViewController.swift */; };
+		B5DBB35E2352627700C971FC /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DBB35D2352627700C971FC /* MenuViewController.swift */; };
 		B5DBB3612352627700C971FC /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5DBB35F2352627700C971FC /* Main.storyboard */; };
 		B5DBB3632352627900C971FC /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B5DBB3622352627900C971FC /* Assets.xcassets */; };
 		B5DBB3662352627900C971FC /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = B5DBB3642352627900C971FC /* LaunchScreen.storyboard */; };
 		B5DBB3712352627900C971FC /* TokenTrapTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DBB3702352627900C971FC /* TokenTrapTests.swift */; };
+		B5DBB37E23526F1300C971FC /* MenuView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DBB37D23526F1300C971FC /* MenuView.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -27,10 +29,11 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B5851EE32353BA4D006A0CD9 /* UIExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIExtension.swift; sourceTree = "<group>"; };
 		B5DBB3562352627700C971FC /* TokenTrap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TokenTrap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5DBB3592352627700C971FC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5DBB35B2352627700C971FC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
-		B5DBB35D2352627700C971FC /* ViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ViewController.swift; sourceTree = "<group>"; };
+		B5DBB35D2352627700C971FC /* MenuViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewController.swift; sourceTree = "<group>"; };
 		B5DBB3602352627700C971FC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		B5DBB3622352627900C971FC /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		B5DBB3652352627900C971FC /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -38,6 +41,7 @@
 		B5DBB36C2352627900C971FC /* TokenTrapTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = TokenTrapTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5DBB3702352627900C971FC /* TokenTrapTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenTrapTests.swift; sourceTree = "<group>"; };
 		B5DBB3722352627900C971FC /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		B5DBB37D23526F1300C971FC /* MenuView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuView.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,7 +85,9 @@
 			children = (
 				B5DBB3592352627700C971FC /* AppDelegate.swift */,
 				B5DBB35B2352627700C971FC /* SceneDelegate.swift */,
-				B5DBB35D2352627700C971FC /* ViewController.swift */,
+				B5DBB35D2352627700C971FC /* MenuViewController.swift */,
+				B5DBB37D23526F1300C971FC /* MenuView.swift */,
+				B5851EE32353BA4D006A0CD9 /* UIExtension.swift */,
 				B5DBB35F2352627700C971FC /* Main.storyboard */,
 				B5DBB3622352627900C971FC /* Assets.xcassets */,
 				B5DBB3642352627900C971FC /* LaunchScreen.storyboard */,
@@ -200,8 +206,10 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				B5DBB35E2352627700C971FC /* ViewController.swift in Sources */,
+				B5DBB35E2352627700C971FC /* MenuViewController.swift in Sources */,
+				B5DBB37E23526F1300C971FC /* MenuView.swift in Sources */,
 				B5DBB35A2352627700C971FC /* AppDelegate.swift in Sources */,
+				B5851EE42353BA4D006A0CD9 /* UIExtension.swift in Sources */,
 				B5DBB35C2352627700C971FC /* SceneDelegate.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -294,7 +302,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
 				MTL_FAST_MATH = YES;
 				ONLY_ACTIVE_ARCH = YES;
@@ -348,7 +356,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				MTL_FAST_MATH = YES;
 				SDKROOT = iphoneos;
@@ -365,6 +373,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Y3UN5Q4PWL;
 				INFOPLIST_FILE = TokenTrap/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
@@ -383,6 +392,7 @@
 				CODE_SIGN_STYLE = Automatic;
 				DEVELOPMENT_TEAM = Y3UN5Q4PWL;
 				INFOPLIST_FILE = TokenTrap/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 12.0;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
