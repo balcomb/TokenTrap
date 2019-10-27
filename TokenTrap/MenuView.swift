@@ -11,7 +11,7 @@ import UIKit
 
 class MenuView: UIView {
 
-    var viewController: MenuViewController
+    unowned var viewController: MenuViewController
 
     let playButtonHeight = CGFloat(44)
     let baseFontSize = CGFloat(15)
@@ -19,6 +19,31 @@ class MenuView: UIView {
     let buttonBlue = UIColor(named: "buttonBlue")
 
     var subviewConstraints = [NSLayoutConstraint]()
+
+    lazy var controlConstraints = [logo.topAnchor.constraint(equalTo: topAnchor),
+                                   logo.leftAnchor.constraint(equalTo: leftAnchor),
+
+                                   playButton.topAnchor.constraint(equalTo: logo.bottomAnchor, constant: playButtonHeight / 2),
+                                   playButton.centerXAnchor.constraint(equalTo: logo.centerXAnchor),
+                                   playButton.heightAnchor.constraint(equalToConstant: playButtonHeight),
+                                   playButton.widthAnchor.constraint(equalTo: logo.widthAnchor),
+
+                                   skillLabel.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: skillLabel.font.pointSize),
+                                   skillLabel.centerXAnchor.constraint(equalTo: playButton.centerXAnchor),
+
+                                   skillControl.topAnchor.constraint(equalTo: skillLabel.bottomAnchor, constant: skillLabel.font.pointSize / 2),
+                                   skillControl.centerXAnchor.constraint(equalTo: skillLabel.centerXAnchor),
+
+                                   learnButton.topAnchor.constraint(equalTo: skillControl.bottomAnchor, constant: skillLabel.font.pointSize * 2),
+                                   learnButton.centerXAnchor.constraint(equalTo: playButton.centerXAnchor),
+                                   learnButton.widthAnchor.constraint(equalTo: playButton.widthAnchor),
+
+                                   trainButton.topAnchor.constraint(equalTo: learnButton.bottomAnchor, constant: skillLabel.font.pointSize / 2),
+                                   trainButton.centerXAnchor.constraint(equalTo: playButton.centerXAnchor),
+                                   trainButton.widthAnchor.constraint(equalTo: playButton.widthAnchor),
+
+                                   bottomAnchor.constraint(equalTo: trainButton.bottomAnchor),
+                                   widthAnchor.constraint(equalTo: logo.widthAnchor)]
 
     lazy var logo: UIImageView = {
         let logo = UIImageView(image: UIImage(named: "logo"))
@@ -35,7 +60,7 @@ class MenuView: UIView {
         playButton.layer.cornerRadius = self.buttonCornerRadius
         playButton.alpha = 0;
         playButton.addTarget(self,
-                             action: #selector(self.handlePlayTap(button:)),
+                             action: #selector(self.handlePlayTap),
                              for: .touchUpInside)
         return playButton
     }()
@@ -70,7 +95,7 @@ class MenuView: UIView {
                                             for: .normal)
         skillControl.alpha = 0;
         skillControl.addTarget(self,
-                               action: #selector(self.handleSkillChange(control:)),
+                               action: #selector(self.handleSkillChange),
                                for: .valueChanged)
         return skillControl
     }()
@@ -78,7 +103,7 @@ class MenuView: UIView {
     lazy var learnButton: UIButton = {
         let learnButton = self.outlineButton(title: "Learn How")
         learnButton.addTarget(self,
-                              action: #selector(self.handleLearnTap(button:)),
+                              action: #selector(self.handleLearnTap),
                               for: .touchUpInside)
         return learnButton
     }()
@@ -86,7 +111,7 @@ class MenuView: UIView {
     lazy var trainButton: UIButton = {
         let trainButton = self.outlineButton(title: "Play in Training Mode")
         trainButton.addTarget(self,
-                              action: #selector(self.handleTrainTap(button:)),
+                              action: #selector(self.handleTrainTap),
                               for: .touchUpInside)
         return trainButton
     }()
@@ -132,30 +157,7 @@ class MenuView: UIView {
             addSubview(control)
         }
 
-        addLayoutConstraints([logo.topAnchor.constraint(equalTo: topAnchor),
-                              logo.leftAnchor.constraint(equalTo: leftAnchor),
-
-                              playButton.topAnchor.constraint(equalTo: logo.bottomAnchor, constant: playButtonHeight / 2),
-                              playButton.centerXAnchor.constraint(equalTo: logo.centerXAnchor),
-                              playButton.heightAnchor.constraint(equalToConstant: playButtonHeight),
-                              playButton.widthAnchor.constraint(equalTo: logo.widthAnchor),
-
-                              skillLabel.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: skillLabel.font.pointSize),
-                              skillLabel.centerXAnchor.constraint(equalTo: playButton.centerXAnchor),
-
-                              skillControl.topAnchor.constraint(equalTo: skillLabel.bottomAnchor, constant: skillLabel.font.pointSize / 2),
-                              skillControl.centerXAnchor.constraint(equalTo: skillLabel.centerXAnchor),
-
-                              learnButton.topAnchor.constraint(equalTo: skillControl.bottomAnchor, constant: skillLabel.font.pointSize * 2),
-                              learnButton.centerXAnchor.constraint(equalTo: playButton.centerXAnchor),
-                              learnButton.widthAnchor.constraint(equalTo: playButton.widthAnchor),
-
-                              trainButton.topAnchor.constraint(equalTo: learnButton.bottomAnchor, constant: skillLabel.font.pointSize / 2),
-                              trainButton.centerXAnchor.constraint(equalTo: playButton.centerXAnchor),
-                              trainButton.widthAnchor.constraint(equalTo: playButton.widthAnchor),
-
-                              bottomAnchor.constraint(equalTo: trainButton.bottomAnchor),
-                              widthAnchor.constraint(equalTo: logo.widthAnchor)])
+        addLayoutConstraints(controlConstraints)
 
         let shiftLogo = UIView.animationItem(duration: 0.5) {
             self.layoutIfNeeded()
@@ -178,23 +180,23 @@ class MenuView: UIView {
         }
     }
 
-    @objc func handlePlayTap(button: UIButton) {
+    @objc func handlePlayTap() {
         viewController.handlePlayTap()
-        animateTap(button: button)
+        animateTap(button: playButton)
     }
 
-    @objc func handleLearnTap(button: UIButton) {
+    @objc func handleLearnTap() {
         viewController.handleLearnTap()
-        animateTap(button: button)
+        animateTap(button: learnButton)
     }
 
-    @objc func handleTrainTap(button: UIButton) {
+    @objc func handleTrainTap() {
         viewController.handleTrainTap()
-        animateTap(button: button)
+        animateTap(button: trainButton)
     }
 
-    @objc func handleSkillChange(control: UISegmentedControl) {
-        viewController.isExpertMode = control.selectedSegmentIndex == 1
+    @objc func handleSkillChange() {
+        viewController.skillLevelDidChange(skillLevelIsExpert: skillControl.selectedSegmentIndex == 1)
     }
 
     func animateTap(button: UIButton) {

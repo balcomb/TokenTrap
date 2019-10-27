@@ -15,40 +15,57 @@ class MenuViewTests: TokenTrapTests {
 
     func testHandlePlayTap() {
         viewControllerMock.handlePlayTapWasCalled = false
-        MenuView(viewController: viewControllerMock).handlePlayTap(button: UIButton())
+        MenuView(viewController: viewControllerMock).handlePlayTap()
         XCTAssertTrue(viewControllerMock.handlePlayTapWasCalled)
     }
 
     func testHandleLearnTap() {
         viewControllerMock.handleLearnTapWasCalled = false
-        MenuView(viewController: viewControllerMock).handleLearnTap(button: UIButton())
+        MenuView(viewController: viewControllerMock).handleLearnTap()
         XCTAssertTrue(viewControllerMock.handleLearnTapWasCalled)
     }
 
     func testHandleTrainTap() {
         viewControllerMock.handleTrainTapWasCalled = false
-        MenuView(viewController: viewControllerMock).handleTrainTap(button: UIButton())
+        MenuView(viewController: viewControllerMock).handleTrainTap()
         XCTAssertTrue(viewControllerMock.handleTrainTapWasCalled)
     }
 
     func testHandleSkillChange() {
-        viewControllerMock.isExpertMode = true
-        let control = UISegmentedControl(items: ["0", "1"])
-        control.selectedSegmentIndex = 0
-        MenuView(viewController: viewControllerMock).handleSkillChange(control: control)
-        XCTAssertFalse(viewControllerMock.isExpertMode)
-
-        control.selectedSegmentIndex = 1
-        MenuView(viewController: viewControllerMock).handleSkillChange(control: control)
-        XCTAssertTrue(viewControllerMock.isExpertMode)
+        viewControllerMock.skillLevelDidChangeWasCalled = false
+        MenuView(viewController: viewControllerMock).handleSkillChange()
+        XCTAssertTrue(viewControllerMock.skillLevelDidChangeWasCalled)
     }
 
+    func testAddLayoutConstraints() {
+        let menuView = MenuView(viewController: MenuViewController())
+        let existingConstraints = menuView.subviewConstraints
+        existingConstraints.forEach { constraint in
+            XCTAssertTrue(constraint.isActive)
+        }
+        let newConstraints = [menuView.widthAnchor.constraint(equalTo: menuView.logo.widthAnchor)]
+        menuView.addLayoutConstraints(newConstraints)
+        XCTAssertEqual(menuView.subviewConstraints, newConstraints)
+        existingConstraints.forEach { constraint in
+            XCTAssertFalse(constraint.isActive)
+        }
+        newConstraints.forEach { constraint in
+            XCTAssertTrue(constraint.isActive)
+        }
+    }
+
+    func testRenderControls() {
+        let menuView = MenuView(viewController: MenuViewController())
+        menuView.renderControls()
+        XCTAssertEqual(menuView.subviewConstraints, menuView.controlConstraints)
+    }
 }
 
 class MenuViewControllerMock: MenuViewController {
     var handlePlayTapWasCalled = false
     var handleLearnTapWasCalled = false
     var handleTrainTapWasCalled = false
+    var skillLevelDidChangeWasCalled = false
 
     override func handlePlayTap() {
         handlePlayTapWasCalled = true
@@ -60,5 +77,9 @@ class MenuViewControllerMock: MenuViewController {
 
     override func handleTrainTap() {
         handleTrainTapWasCalled = true
+    }
+
+    override func skillLevelDidChange(skillLevelIsExpert: Bool) {
+        skillLevelDidChangeWasCalled = true
     }
 }

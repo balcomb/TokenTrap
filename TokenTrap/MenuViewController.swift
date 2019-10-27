@@ -10,7 +10,7 @@ import UIKit
 
 class MenuViewController: UIViewController {
 
-    var isExpertMode = false
+    var skillLevelIsExpert = false
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -31,6 +31,10 @@ class MenuViewController: UIViewController {
 
     func handleTrainTap() {
         print("handleTrainTap")
+    }
+
+    func skillLevelDidChange(skillLevelIsExpert: Bool) {
+        self.skillLevelIsExpert = skillLevelIsExpert
     }
 }
 
