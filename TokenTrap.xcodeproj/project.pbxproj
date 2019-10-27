@@ -8,6 +8,7 @@
 
 /* Begin PBXBuildFile section */
 		B5851EE42353BA4D006A0CD9 /* UIExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5851EE32353BA4D006A0CD9 /* UIExtension.swift */; };
+		B5851EE623650877006A0CD9 /* MenuViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5851EE523650877006A0CD9 /* MenuViewTests.swift */; };
 		B5DBB35A2352627700C971FC /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DBB3592352627700C971FC /* AppDelegate.swift */; };
 		B5DBB35C2352627700C971FC /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DBB35B2352627700C971FC /* SceneDelegate.swift */; };
 		B5DBB35E2352627700C971FC /* MenuViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5DBB35D2352627700C971FC /* MenuViewController.swift */; };
@@ -30,6 +31,7 @@
 
 /* Begin PBXFileReference section */
 		B5851EE32353BA4D006A0CD9 /* UIExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIExtension.swift; sourceTree = "<group>"; };
+		B5851EE523650877006A0CD9 /* MenuViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewTests.swift; sourceTree = "<group>"; };
 		B5DBB3562352627700C971FC /* TokenTrap.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = TokenTrap.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		B5DBB3592352627700C971FC /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		B5DBB35B2352627700C971FC /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 			isa = PBXGroup;
 			children = (
 				B5DBB3702352627900C971FC /* TokenTrapTests.swift */,
+				B5851EE523650877006A0CD9 /* MenuViewTests.swift */,
 				B5DBB3722352627900C971FC /* Info.plist */,
 			);
 			path = TokenTrapTests;
@@ -219,6 +222,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				B5DBB3712352627900C971FC /* TokenTrapTests.swift in Sources */,
+				B5851EE623650877006A0CD9 /* MenuViewTests.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
