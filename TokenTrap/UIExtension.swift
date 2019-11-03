@@ -26,4 +26,18 @@ extension UIView {
         }
     }
 
+    func addSubviews(_ views: [UIView]) {
+        for view in views {
+            addSubview(view)
+        }
+    }
+}
+
+extension UIColor {
+    open class var gold: UIColor {
+        UIColor(named: "gold")!
+    }
+    open class var background: UIColor {
+        UIColor(named: "background")!
+    }
 }

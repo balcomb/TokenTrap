@@ -26,7 +26,7 @@ class MenuViewController: UIViewController {
     }
 
     func handleLearnTap() {
-        print("handleLearnTap")
+        present(LearnHowViewController(), animated: true, completion: nil)
     }
 
     func handleTrainTap() {
