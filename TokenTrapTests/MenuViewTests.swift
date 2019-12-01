@@ -37,27 +37,10 @@ class MenuViewTests: TokenTrapTests {
         XCTAssertTrue(viewControllerMock.skillLevelDidChangeWasCalled)
     }
 
-    func testAddLayoutConstraints() {
-        let menuView = MenuView(viewController: MenuViewController())
-        let existingConstraints = menuView.subviewConstraints
-        existingConstraints.forEach { constraint in
-            XCTAssertTrue(constraint.isActive)
-        }
-        let newConstraints = [menuView.widthAnchor.constraint(equalTo: menuView.logo.widthAnchor)]
-        menuView.addLayoutConstraints(newConstraints)
-        XCTAssertEqual(menuView.subviewConstraints, newConstraints)
-        existingConstraints.forEach { constraint in
-            XCTAssertFalse(constraint.isActive)
-        }
-        newConstraints.forEach { constraint in
-            XCTAssertTrue(constraint.isActive)
-        }
-    }
-
     func testRenderControls() {
         let menuView = MenuView(viewController: MenuViewController())
         menuView.renderControls()
-        XCTAssertEqual(menuView.subviewConstraints, menuView.controlConstraints)
+        XCTAssertEqual(menuView.viewConstraints.activeConstraints, menuView.controlConstraints)
     }
 }
 
@@ -79,7 +62,7 @@ class MenuViewControllerMock: MenuViewController {
         handleTrainTapWasCalled = true
     }
 
-    override func skillLevelDidChange(skillLevelIsExpert: Bool) {
+    override func skillLevelDidChange(expertModeOn: Bool) {
         skillLevelDidChangeWasCalled = true
     }
 }

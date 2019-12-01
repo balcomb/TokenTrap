@@ -18,7 +18,6 @@ class LearnHowViewController: UIViewController {
 
     lazy var closeButton: UIButton = {
         let closeButton = UIButton()
-        closeButton.translatesAutoresizingMaskIntoConstraints = false
         closeButton.setTitle("Close", for: .normal)
         closeButton.addTarget(self,
                               action: #selector(handleCloseTap),
@@ -28,14 +27,12 @@ class LearnHowViewController: UIViewController {
 
     lazy var closeBar: UIView = {
         let closeBar = UIView()
-        closeBar.translatesAutoresizingMaskIntoConstraints = false
         closeBar.backgroundColor = UIColor(white: 1, alpha: 0.25)
         return closeBar
     }()
 
     lazy var scrollView: UIScrollView = {
         let scrollView = UIScrollView()
-        scrollView.translatesAutoresizingMaskIntoConstraints = false
         return scrollView
     }()
 
@@ -71,18 +68,18 @@ class LearnHowViewController: UIViewController {
     }
 
     func addViews() {
-        view.addSubviews([closeBar,
-                          scrollView])
-        closeBar.addSubview(closeButton)
-        scrollView.addSubviews([headlineLabel,
-                                subheadLabel1,
-                                bodyLabel1,
-                                subheadLabel2,
-                                bodyLabel2_1,
-                                bodyLabel2_2,
-                                subheadLabel3,
-                                bodyLabel3])
-        scrollView.addSubviews(tokenGrid)
+        view.addNoMaskSubviews([closeBar,
+                                scrollView])
+        closeBar.addNoMaskSubviews([closeButton])
+        scrollView.addNoMaskSubviews([headlineLabel,
+                                      subheadLabel1,
+                                      bodyLabel1,
+                                      subheadLabel2,
+                                      bodyLabel2_1,
+                                      bodyLabel2_2,
+                                      subheadLabel3,
+                                      bodyLabel3])
+        scrollView.addNoMaskSubviews(tokenGrid)
         addTokenGroupViews([tokenGroup2_1,
                             tokenGroup2_2,
                             tokenGroup2_3,
@@ -149,6 +146,7 @@ class LearnHowViewController: UIViewController {
     }
 
     override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
         DispatchQueue.main.async {
             self.scrollView.contentSize = CGSize(width: self.scrollView.frame.size.width,
                                                  height: self.bodyLabel3.frame.maxY + self.tokenSize);
@@ -207,7 +205,6 @@ class LearnHowViewController: UIViewController {
 
     func defaultLabel(text: String) -> UILabel {
         let label = UILabel()
-        label.translatesAutoresizingMaskIntoConstraints = false
         label.text = text
         label.textColor = UIColor.white
         label.font = UIFont.boldSystemFont(ofSize: 18)
@@ -229,7 +226,6 @@ class LearnHowViewController: UIViewController {
 
         for _ in 0 ..< size {
             let token = UIView()
-            token.translatesAutoresizingMaskIntoConstraints = false
             token.backgroundColor = UIColor.white
             token.layer.cornerRadius = tokenSize / 2
             tokens.append(token)
@@ -249,9 +245,9 @@ class LearnHowViewController: UIViewController {
 
     func addTokenGroupViews(_ tokenGroups: [TokenGroup]) {
         for group in tokenGroups {
-            scrollView.addSubviews([group.token1,
-                                    group.token2,
-                                    group.captionLabel])
+            scrollView.addNoMaskSubviews([group.token1,
+                                          group.token2,
+                                          group.captionLabel])
         }
     }
 

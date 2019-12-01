@@ -16,9 +16,8 @@ class MenuView: UIView {
     let playButtonHeight = CGFloat(44)
     let baseFontSize = CGFloat(15)
     let buttonCornerRadius = CGFloat(4)
-    let buttonBlue = UIColor(named: "buttonBlue")
 
-    var subviewConstraints = [NSLayoutConstraint]()
+    var viewConstraints = ViewConstraints()
 
     lazy var controlConstraints = [logo.topAnchor.constraint(equalTo: topAnchor),
                                    logo.leftAnchor.constraint(equalTo: leftAnchor),
@@ -47,14 +46,12 @@ class MenuView: UIView {
 
     lazy var logo: UIImageView = {
         let logo = UIImageView(image: UIImage(named: "logo"))
-        logo.translatesAutoresizingMaskIntoConstraints = false
         return logo
     }()
 
     lazy var playButton: UIButton = {
         let playButton = UIButton()
-        playButton.translatesAutoresizingMaskIntoConstraints = false
-        playButton.backgroundColor = self.buttonBlue
+        playButton.backgroundColor = UIColor.buttonBlue
         playButton.setTitle("Play", for: .normal)
         playButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: ceil(self.baseFontSize * 1.2))
         playButton.layer.cornerRadius = self.buttonCornerRadius
@@ -67,7 +64,6 @@ class MenuView: UIView {
 
     lazy var skillLabel: UILabel = {
         let skillLabel = UILabel()
-        skillLabel.translatesAutoresizingMaskIntoConstraints = false
         skillLabel.text = "SKILL LEVEL"
         skillLabel.font = UIFont.boldSystemFont(ofSize: floor(self.baseFontSize * 0.8))
         skillLabel.textColor = UIColor(named: "skillColor")
@@ -77,12 +73,11 @@ class MenuView: UIView {
 
     lazy var skillControl: UISegmentedControl = {
         let skillControl = UISegmentedControl(items: ["Basic", "Expert"])
-        skillControl.translatesAutoresizingMaskIntoConstraints = false
         skillControl.selectedSegmentIndex = 0
         let tintColor = UIColor(named: "logoBlue")
 
         if #available(iOS 13.0, *) {
-            skillControl.backgroundColor = self.buttonBlue
+            skillControl.backgroundColor = UIColor.buttonBlue
             skillControl.selectedSegmentTintColor = tintColor
         } else {
             skillControl.tintColor = tintColor
@@ -119,10 +114,9 @@ class MenuView: UIView {
     init(viewController: MenuViewController) {
         self.viewController = viewController
         super.init(frame: CGRect.zero)
-        translatesAutoresizingMaskIntoConstraints = false
-        addSubview(logo)
-        addLayoutConstraints([widthAnchor.constraint(equalTo: logo.widthAnchor),
-                              heightAnchor.constraint(equalTo: logo.heightAnchor)])
+        addNoMaskSubviews([logo])
+        viewConstraints.update([widthAnchor.constraint(equalTo: logo.widthAnchor),
+                                heightAnchor.constraint(equalTo: logo.heightAnchor)])
 
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(2)) {
             self.renderControls()
@@ -135,9 +129,9 @@ class MenuView: UIView {
 
     func outlineButton(title: String) -> UIButton {
         let button = UIButton()
-        button.translatesAutoresizingMaskIntoConstraints = false
         button.setTitle(title, for: .normal)
         button.titleLabel?.font = UIFont.boldSystemFont(ofSize: baseFontSize)
+        button.layer.borderColor = UIColor.buttonBlue.cgColor
         button.layer.borderWidth = 1
         button.layer.cornerRadius = self.buttonCornerRadius
         button.alpha = 0
@@ -145,19 +139,14 @@ class MenuView: UIView {
         return button
     }
 
-    override func layoutSubviews() {
-        learnButton.layer.borderColor = self.buttonBlue?.cgColor
-        trainButton.layer.borderColor = self.buttonBlue?.cgColor
-    }
-
     func renderControls() {
-        let controls = [playButton, skillLabel, skillControl, learnButton, trainButton]
-
-        controls.forEach { control in
-            addSubview(control)
-        }
-
-        addLayoutConstraints(controlConstraints)
+        let controls = [playButton,
+                        skillLabel,
+                        skillControl,
+                        learnButton,
+                        trainButton]
+        addNoMaskSubviews(controls)
+        viewConstraints.update(controlConstraints)
 
         let shiftLogo = UIView.animationItem(duration: 0.5) {
             self.layoutIfNeeded()
@@ -168,16 +157,6 @@ class MenuView: UIView {
             }
         }
         UIView.executeAnimationSequence([shiftLogo, fadeInControls])
-    }
-
-    func addLayoutConstraints(_ constraints: [NSLayoutConstraint]) {
-        subviewConstraints.forEach { constraint in
-            constraint.isActive = false
-        }
-        subviewConstraints = constraints
-        subviewConstraints.forEach { constraint in
-            constraint.isActive = true
-        }
     }
 
     @objc func handlePlayTap() {
@@ -196,7 +175,7 @@ class MenuView: UIView {
     }
 
     @objc func handleSkillChange() {
-        viewController.skillLevelDidChange(skillLevelIsExpert: skillControl.selectedSegmentIndex == 1)
+        viewController.skillLevelDidChange(expertModeOn: skillControl.selectedSegmentIndex == 1)
     }
 
     func animateTap(button: UIButton) {
