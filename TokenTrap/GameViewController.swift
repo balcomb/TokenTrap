@@ -22,28 +22,26 @@ class GameViewController: UIViewController {
     var orientationConstraints = ViewConstraints()
     lazy var timerView = TimerView()
 
-    lazy var targetIcon: UIView = {
-        let targetIcon = UIView()
-        targetIcon.alpha = 0
-        targetIcon.backgroundColor = UIColor.white
-        targetIcon.layer.cornerRadius = levelIntroView.targetIconSize / 2
-        return targetIcon
+    lazy var targetTokenView: TokenView = {
+        let targetToken = TokenView()
+        targetToken.alpha = 0
+        return targetToken
     }()
 
-    lazy var targetIconIntroConstraints: [NSLayoutConstraint] = {
-        [targetIcon.centerXAnchor.constraint(equalTo: levelIntroView.centerXAnchor),
-         targetIcon.bottomAnchor.constraint(equalTo: levelIntroView.bottomAnchor,
-                                            constant: -levelIntroView.margin)]
+    lazy var targetTokenIntroConstraints: [NSLayoutConstraint] = {
+        [targetTokenView.centerXAnchor.constraint(equalTo: levelIntroView.centerXAnchor),
+         targetTokenView.bottomAnchor.constraint(equalTo: levelIntroView.bottomAnchor,
+                                                 constant: -levelIntroView.margin)]
     }()
 
-    lazy var targetIconFullConstraints: ViewConstraints = {
+    lazy var targetTokenFullConstraints: ViewConstraints = {
         var constraints = ViewConstraints()
-        constraints.addForOrientation(landscape: [targetIcon.rightAnchor.constraint(equalTo: timerView.leftAnchor,
-                                                                                    constant: -levelIntroView.targetIconSize),
-                                                  targetIcon.centerYAnchor.constraint(equalTo: gridView.centerYAnchor)],
-                                      portrait: [targetIcon.centerXAnchor.constraint(equalTo: gridView.centerXAnchor),
-                                                 targetIcon.bottomAnchor.constraint(equalTo: timerView.topAnchor,
-                                                                                    constant: -levelIntroView.targetIconSize)])
+        constraints.addForOrientation(landscape: [targetTokenView.rightAnchor.constraint(equalTo: timerView.leftAnchor,
+                                                                                         constant: -levelIntroView.targetTokenSize),
+                                                  targetTokenView.centerYAnchor.constraint(equalTo: gridView.centerYAnchor)],
+                                      portrait: [targetTokenView.centerXAnchor.constraint(equalTo: gridView.centerXAnchor),
+                                                 targetTokenView.bottomAnchor.constraint(equalTo: timerView.topAnchor,
+                                                                                         constant: -levelIntroView.targetTokenSize)])
         return constraints
     }()
 
@@ -62,7 +60,7 @@ class GameViewController: UIViewController {
 
     var viewsToHideOnRotation: [UIView] {
         [timerView,
-         targetIcon]
+         targetTokenView]
     }
 
     override func viewDidLoad() {
@@ -72,7 +70,7 @@ class GameViewController: UIViewController {
         view.addNoMaskSubviews([gridView,
                                 timerView,
                                 levelIntroView,
-                                targetIcon])
+                                targetTokenView])
         setUpConstraints()
     }
 
@@ -88,8 +86,8 @@ class GameViewController: UIViewController {
         super.viewWillLayoutSubviews()
         orientationConstraints.updateForOrientation()
 
-        if targetIconFullConstraints.activeConstraints != targetIconIntroConstraints {
-            targetIconFullConstraints.updateForOrientation()
+        if targetTokenFullConstraints.activeConstraints != targetTokenIntroConstraints {
+            targetTokenFullConstraints.updateForOrientation()
         }
     }
 
@@ -109,8 +107,14 @@ class GameViewController: UIViewController {
         startLevel()
     }
 
+    func updateTargetToken() {
+        targetTokenView.color = TokenColor.random()
+        targetTokenView.icon = TokenIcon.random()
+    }
+
     func startLevel() {
         gameData.level += 1
+        updateTargetToken()
         showLevelIntro()
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(3)) {
             self.hideLevelIntro()
@@ -119,9 +123,9 @@ class GameViewController: UIViewController {
 
     func showLevelIntro() {
         levelIntroView.updateLevel(gameData.level)
-        targetIconFullConstraints.update(targetIconIntroConstraints)
+        targetTokenFullConstraints.update(targetTokenIntroConstraints)
         self.view.layoutIfNeeded()
-        targetIcon.alpha = 1
+        targetTokenView.alpha = 1
         animateIntroLevel(show: true)
     }
 
@@ -136,7 +140,7 @@ class GameViewController: UIViewController {
         } else {
             levelIntroYPositionConstraints.onscreen.isActive = false
             levelIntroYPositionConstraints.offscreen.isActive = true
-            targetIconFullConstraints.updateForOrientation()
+            targetTokenFullConstraints.updateForOrientation()
         }
 
         let levelIntroAnimation = UIView.animationItem(duration: 0.5) {
@@ -155,8 +159,8 @@ class GameViewController: UIViewController {
     }
 
     func setUpTargetConstraints() {
-        let constraints = [targetIcon.widthAnchor.constraint(equalToConstant: levelIntroView.targetIconSize),
-                           targetIcon.heightAnchor.constraint(equalToConstant: levelIntroView.targetIconSize)]
+        let constraints = [targetTokenView.widthAnchor.constraint(equalToConstant: levelIntroView.targetTokenSize),
+                           targetTokenView.heightAnchor.constraint(equalToConstant: levelIntroView.targetTokenSize)]
         constraints.forEach { $0.isActive = true }
     }
 

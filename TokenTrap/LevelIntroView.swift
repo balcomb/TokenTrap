@@ -10,7 +10,7 @@ import UIKit
 
 class LevelIntroView: UIView {
 
-    let targetIconSize = CGFloat(44)
+    let targetTokenSize = CGFloat(44)
     let margin = CGFloat(22)
     let padding = CGFloat(8)
 
@@ -65,7 +65,7 @@ class LevelIntroView: UIView {
                                                             constant: padding),
                            targetLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
                            bottomAnchor.constraint(equalTo: targetLabel.bottomAnchor,
-                                                   constant: targetIconSize + margin + padding),
+                                                   constant: targetTokenSize + margin + padding),
                            widthAnchor.constraint(equalTo: heightAnchor)]
         constraints.forEach { $0.isActive = true }
     }

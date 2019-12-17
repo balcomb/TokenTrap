@@ -46,15 +46,31 @@ class LearnHowViewController: UIViewController {
     lazy var subheadLabel1 = defaultLabel(text: "1. Tokens Have an Icon and a Color")
     lazy var bodyLabel1 = bodyLabel(text: "There are three different icons and three different colors.")
 
-    lazy var tokenGrid = tokenList(size: 9)
+    lazy var tokenGrid = tokenList([(.blue, .die),
+                                    (.gray, .die),
+                                    (.red, .die),
+                                    (.blue, .face),
+                                    (.gray, .face),
+                                    (.red, .face),
+                                    (.blue, .star),
+                                    (.gray, .star),
+                                    (.red, .star)])
 
     lazy var subheadLabel2 = defaultLabel(text: "2. Change the Board by Finding Partial Matches")
     lazy var bodyLabel2_1 = bodyLabel(text: "Tokens are partial matches when they have the same icon or the same color (but not both).")
-    lazy var tokenGroup2_1 = tokenGroup(caption: "Partial Match: Color")
-    lazy var tokenGroup2_2 = tokenGroup(caption: "Partial Match: Icon")
+    lazy var tokenGroup2_1 = tokenGroup([(.gray, .face),
+                                         (.gray, .star)],
+                                        caption: "Partial Match: Color")
+    lazy var tokenGroup2_2 = tokenGroup([(.blue, .die),
+                                         (.red, .die)],
+                                        caption: "Partial Match: Icon")
     lazy var bodyLabel2_2 = bodyLabel(text: "Select a side-by-side pair of tokens that is a partial match, and it becomes a full match. The full match is made by changing the property in which the tokens don't match. For example, if the tokens have the same icon but different colors, each token's color will change to a new matching color.")
-    lazy var tokenGroup2_3 = tokenGroup(caption: "Selected Partial Match")
-    lazy var tokenGroup2_4 = tokenGroup(caption: "Resulting Full Match")
+    lazy var tokenGroup2_3 = tokenGroup([(.red, .star),
+                                         (.gray, .star)],
+                                        caption: "Selected Partial Match")
+    lazy var tokenGroup2_4 = tokenGroup([(.blue, .star),
+                                         (.blue, .star)],
+                                        caption: "Resulting Full Match")
 
     lazy var subheadLabel3 = defaultLabel(text: "3. Clear Rows")
     lazy var bodyLabel3 = bodyLabel(text: "Each level has a target token. Create full match pairs that also match the target, and that pair's row is removed from the board.")
@@ -221,21 +237,18 @@ class LearnHowViewController: UIViewController {
         return label
     }
 
-    func tokenList(size: Int) -> [UIView] {
+    func tokenList(_ tokenAttributes: [TokenAttributes]) -> [UIView] {
         var tokens = [UIView]()
 
-        for _ in 0 ..< size {
-            let token = UIView()
-            token.backgroundColor = UIColor.white
-            token.layer.cornerRadius = tokenSize / 2
-            tokens.append(token)
+        for attributes in tokenAttributes {
+            tokens.append(TokenView(attributes))
         }
 
         return tokens
     }
 
-    func tokenGroup(caption: String) -> TokenGroup {
-        let tokens = tokenList(size: 2)
+    func tokenGroup(_ tokenAttributes: [TokenAttributes], caption: String) -> TokenGroup {
+        let tokens = tokenList(tokenAttributes)
         let captionLabel = defaultLabel(text: caption)
         captionLabel.font = UIFont.boldSystemFont(ofSize: 12)
         captionLabel.textAlignment = .center
