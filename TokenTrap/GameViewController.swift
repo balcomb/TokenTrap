@@ -8,12 +8,51 @@
 
 import UIKit
 
+struct GameData {
+    var level = 0
+    var score = 0
+}
+
 class GameViewController: UIViewController {
+
+    var gameData = GameData()
 
     var expertModeOn = false
     var trainingModeOn = false
     var orientationConstraints = ViewConstraints()
     lazy var timerView = TimerView()
+
+    lazy var targetIcon: UIView = {
+        let targetIcon = UIView()
+        targetIcon.alpha = 0
+        targetIcon.backgroundColor = UIColor.white
+        targetIcon.layer.cornerRadius = levelIntroView.targetIconSize / 2
+        return targetIcon
+    }()
+
+    lazy var targetIconIntroConstraints: [NSLayoutConstraint] = {
+        [targetIcon.centerXAnchor.constraint(equalTo: levelIntroView.centerXAnchor),
+         targetIcon.bottomAnchor.constraint(equalTo: levelIntroView.bottomAnchor,
+                                            constant: -levelIntroView.margin)]
+    }()
+
+    lazy var targetIconFullConstraints: ViewConstraints = {
+        var constraints = ViewConstraints()
+        constraints.addForOrientation(landscape: [targetIcon.rightAnchor.constraint(equalTo: timerView.leftAnchor,
+                                                                                    constant: -levelIntroView.targetIconSize),
+                                                  targetIcon.centerYAnchor.constraint(equalTo: gridView.centerYAnchor)],
+                                      portrait: [targetIcon.centerXAnchor.constraint(equalTo: gridView.centerXAnchor),
+                                                 targetIcon.bottomAnchor.constraint(equalTo: timerView.topAnchor,
+                                                                                    constant: -levelIntroView.targetIconSize)])
+        return constraints
+    }()
+
+    lazy var levelIntroYPositionConstraints: (offscreen: NSLayoutConstraint, onscreen: NSLayoutConstraint) = {
+        (levelIntroView.topAnchor.constraint(equalTo: view.bottomAnchor),
+         levelIntroView.centerYAnchor.constraint(equalTo: gridView.centerYAnchor))
+    }()
+
+    lazy var levelIntroView = LevelIntroView()
 
     lazy var gridView: UIView = {
         let view = UIView()
@@ -21,34 +60,110 @@ class GameViewController: UIViewController {
         return view
     }()
 
+    var viewsToHideOnRotation: [UIView] {
+        [timerView,
+         targetIcon]
+    }
+
     override func viewDidLoad() {
         super.viewDidLoad()
 
         view.backgroundColor = UIColor.background
         view.addNoMaskSubviews([gridView,
-                                timerView])
+                                timerView,
+                                levelIntroView,
+                                targetIcon])
         setUpConstraints()
+    }
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+
+        if gameData.level < 1 {
+            startGame()
+        }
     }
 
     override func viewWillLayoutSubviews() {
         super.viewWillLayoutSubviews()
         orientationConstraints.updateForOrientation()
+
+        if targetIconFullConstraints.activeConstraints != targetIconIntroConstraints {
+            targetIconFullConstraints.updateForOrientation()
+        }
     }
 
     override func viewWillTransition(to size: CGSize,
                                      with coordinator: UIViewControllerTransitionCoordinator) {
         super.viewWillTransition(to: size,
                                  with: coordinator)
-        timerView.isHidden = true
+
+        viewsToHideOnRotation.forEach { $0.isHidden = true }
+
         coordinator.animate(alongsideTransition: nil) { _ in
-            self.timerView.isHidden = false
+            self.viewsToHideOnRotation.forEach { $0.isHidden = false }
         }
+    }
+
+    func startGame() {
+        startLevel()
+    }
+
+    func startLevel() {
+        gameData.level += 1
+        showLevelIntro()
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(3)) {
+            self.hideLevelIntro()
+        }
+    }
+
+    func showLevelIntro() {
+        levelIntroView.updateLevel(gameData.level)
+        targetIconFullConstraints.update(targetIconIntroConstraints)
+        self.view.layoutIfNeeded()
+        targetIcon.alpha = 1
+        animateIntroLevel(show: true)
+    }
+
+    func hideLevelIntro() {
+        animateIntroLevel(show: false)
+    }
+
+    func animateIntroLevel(show: Bool) {
+        if show {
+            levelIntroYPositionConstraints.offscreen.isActive = false
+            levelIntroYPositionConstraints.onscreen.isActive = true
+        } else {
+            levelIntroYPositionConstraints.onscreen.isActive = false
+            levelIntroYPositionConstraints.offscreen.isActive = true
+            targetIconFullConstraints.updateForOrientation()
+        }
+
+        let levelIntroAnimation = UIView.animationItem(duration: 0.5) {
+            self.levelIntroView.alpha = show ? 1 : 0
+            self.view.layoutIfNeeded()
+        }
+        UIView.executeAnimationSequence([levelIntroAnimation])
     }
 
     func setUpConstraints() {
         setUpGridConstraints()
         setUpTimerConstraints()
         orientationConstraints.merge(timerView.indicatorConstraints)
+        setUpIntroConstraints()
+        setUpTargetConstraints()
+    }
+
+    func setUpTargetConstraints() {
+        let constraints = [targetIcon.widthAnchor.constraint(equalToConstant: levelIntroView.targetIconSize),
+                           targetIcon.heightAnchor.constraint(equalToConstant: levelIntroView.targetIconSize)]
+        constraints.forEach { $0.isActive = true }
+    }
+
+    func setUpIntroConstraints() {
+        let constraints = [levelIntroView.centerXAnchor.constraint(equalTo: gridView.centerXAnchor),
+                           levelIntroYPositionConstraints.offscreen]
+        constraints.forEach { $0.isActive = true }
     }
 
     func setUpGridConstraints() {
@@ -63,7 +178,6 @@ class GameViewController: UIViewController {
                                                      portrait: [gridView.widthAnchor.constraint(equalTo: view.widthAnchor,
                                                                                                 multiplier: multiplier),
                                                                 gridView.heightAnchor.constraint(equalTo: gridView.widthAnchor)])
-
             return
         }
 
