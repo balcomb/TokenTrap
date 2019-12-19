@@ -148,14 +148,14 @@ class MenuView: UIView {
         addNoMaskSubviews(controls)
         viewConstraints.update(controlConstraints)
 
-        let shiftLogo = UIView.animationItem(duration: 0.5) {
+        let shiftLogo: AnimationItem = (0.5, {
             self.layoutIfNeeded()
-        }
-        let fadeInControls = UIView.animationItem(duration: 0.3) {
+        })
+        let fadeInControls: AnimationItem = (0.3, {
             controls.forEach { control in
                 control.alpha = 1
             }
-        }
+        })
         UIView.executeAnimationSequence([shiftLogo, fadeInControls])
     }
 
@@ -181,12 +181,12 @@ class MenuView: UIView {
     func animateTap(button: UIButton) {
         let duration = 0.08
 
-        let fadeOut = UIView.animationItem(duration: duration) {
+        let fadeOut: AnimationItem = (duration, {
             button.alpha = 0.6
-        }
-        let fadeIn = UIView.animationItem(duration: duration) {
+        })
+        let fadeIn: AnimationItem = (duration, {
             button.alpha = 1
-        }
+        })
         UIView.executeAnimationSequence([fadeOut, fadeIn])
     }
 }

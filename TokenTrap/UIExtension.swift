@@ -49,21 +49,22 @@ struct ViewConstraints {
     }
 }
 
+typealias AnimationItem = (duration: TimeInterval, animation: () -> Void)
+
 extension UIView {
 
-    static func animationItem(duration: TimeInterval, animation: @escaping () -> Void) -> (duration: TimeInterval, animation: () -> Void) {
-        return (duration, animation)
-    }
+    static func executeAnimationSequence(_ animations: [AnimationItem],
+                                         completion: (() -> Void)? = nil) {
+        guard let item = animations.first else {
 
-    static func executeAnimationSequence(_ animations: [(duration: TimeInterval, animation: () -> Void)]) {
-        guard let duration = animations.first?.duration,
-            let animationBlock = animations.first?.animation else {
+            completion?()
+
             return
         }
 
-        UIView.animate(withDuration: duration,
-                       animations: animationBlock) { _ in
-                        self.executeAnimationSequence(Array(animations.suffix(from: 1)))
+        UIView.animate(withDuration: item.duration,
+                       animations: item.animation) { _ in
+                        self.executeAnimationSequence(Array(animations.suffix(from: 1)), completion: completion)
         }
     }
 

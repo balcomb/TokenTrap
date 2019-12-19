@@ -17,6 +17,10 @@ class GameViewController: UIViewController {
 
     var gameData = GameData()
 
+    var addRowTimer: Timer?
+    let addRowCountLimit = 4
+    var addRowCount = 0
+
     var expertModeOn = false
     var trainingModeOn = false
     var orientationConstraints = ViewConstraints()
@@ -25,6 +29,7 @@ class GameViewController: UIViewController {
     lazy var targetTokenView: TokenView = {
         let targetToken = TokenView()
         targetToken.alpha = 0
+        targetToken.isUserInteractionEnabled = false
         return targetToken
     }()
 
@@ -50,7 +55,13 @@ class GameViewController: UIViewController {
          levelIntroView.centerYAnchor.constraint(equalTo: gridView.centerYAnchor))
     }()
 
-    lazy var levelIntroView = LevelIntroView()
+    lazy var levelIntroView: LevelIntroView = {
+        let view = LevelIntroView()
+        let tapGesture = UITapGestureRecognizer.init(target: self,
+                                                     action: #selector(finishLevelStart))
+        view.addGestureRecognizer(tapGesture)
+        return view
+    }()
 
     lazy var gridView: UIView = {
         let view = UIView()
@@ -116,8 +127,16 @@ class GameViewController: UIViewController {
         gameData.level += 1
         updateTargetToken()
         showLevelIntro()
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(3)) {
-            self.hideLevelIntro()
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(5)) {
+            self.finishLevelStart()
+        }
+    }
+
+    @objc func finishLevelStart() {
+        self.hideLevelIntro {
+            self.addRow()
+            self.startAddRowTimer()
         }
     }
 
@@ -126,28 +145,57 @@ class GameViewController: UIViewController {
         targetTokenFullConstraints.update(targetTokenIntroConstraints)
         self.view.layoutIfNeeded()
         targetTokenView.alpha = 1
-        animateIntroLevel(show: true)
+
+        levelIntroYPositionConstraints.offscreen.isActive = false
+        levelIntroYPositionConstraints.onscreen.isActive = true
+        animateIntroLevel()
     }
 
-    func hideLevelIntro() {
-        animateIntroLevel(show: false)
-    }
-
-    func animateIntroLevel(show: Bool) {
-        if show {
-            levelIntroYPositionConstraints.offscreen.isActive = false
-            levelIntroYPositionConstraints.onscreen.isActive = true
-        } else {
-            levelIntroYPositionConstraints.onscreen.isActive = false
-            levelIntroYPositionConstraints.offscreen.isActive = true
-            targetTokenFullConstraints.updateForOrientation()
+    func hideLevelIntro(completion: @escaping () -> Void) {
+        guard levelIntroYPositionConstraints.onscreen.isActive else {
+            return
         }
 
-        let levelIntroAnimation = UIView.animationItem(duration: 0.5) {
-            self.levelIntroView.alpha = show ? 1 : 0
+        levelIntroYPositionConstraints.onscreen.isActive = false
+        levelIntroYPositionConstraints.offscreen.isActive = true
+        targetTokenFullConstraints.updateForOrientation()
+        animateIntroLevel(completion: completion)
+    }
+
+    func animateIntroLevel(completion: (() -> Void)? = nil) {
+        let levelIntroAnimation: AnimationItem = (0.5, {
+            self.levelIntroView.alpha = self.levelIntroView.alpha == 0 ? 1 : 0
             self.view.layoutIfNeeded()
+        })
+
+        UIView.executeAnimationSequence([levelIntroAnimation]) {
+            completion?()
         }
-        UIView.executeAnimationSequence([levelIntroAnimation])
+    }
+
+    func addRow() {
+        // to come
+    }
+
+    func startAddRowTimer() {
+        addRowTimer?.invalidate()
+
+        addRowTimer = Timer.scheduledTimer(timeInterval: 1,
+                                           target: self,
+                                           selector: #selector(handleAddRowTimer),
+                                           userInfo: nil,
+                                           repeats: true)
+    }
+
+    @objc func handleAddRowTimer() {
+        if addRowCount < addRowCountLimit {
+            addRowCount += 1
+        } else {
+            addRowCount = 0
+            addRow()
+        }
+
+        timerView.update(count: addRowCount)
     }
 
     func setUpConstraints() {

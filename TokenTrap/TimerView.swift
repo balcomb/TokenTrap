@@ -66,4 +66,9 @@ class TimerView: UIView {
         addNoMaskSubviews(indicators)
     }
 
+    func update(count: Int) {
+        for (index, indicator) in indicators.enumerated() {
+            indicator.backgroundColor = index < count ? UIColor.green : UIColor.darkGreen
+        }
+    }
 }
