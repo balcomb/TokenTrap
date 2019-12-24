@@ -38,6 +38,8 @@ enum TokenColor: String {
 
 class TokenView: UIView {
 
+    var id = TokenID.notSet
+
     var icon = TokenIcon.notSet {
         didSet {
             iconView.image = UIImage(named: icon.rawValue)?.withRenderingMode(.alwaysTemplate)

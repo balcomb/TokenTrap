@@ -10,6 +10,7 @@
 		B5442188238AF3C7009C8473 /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5442187238AF3C7009C8473 /* TimerView.swift */; };
 		B544218A23A6D906009C8473 /* LevelIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B544218923A6D905009C8473 /* LevelIntroView.swift */; };
 		B544218C23A94B4B009C8473 /* TokenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B544218B23A94B4B009C8473 /* TokenView.swift */; };
+		B544218E23ABDD94009C8473 /* GridView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B544218D23ABDD94009C8473 /* GridView.swift */; };
 		B5851EE42353BA4D006A0CD9 /* UIExtension.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5851EE32353BA4D006A0CD9 /* UIExtension.swift */; };
 		B5851EE623650877006A0CD9 /* MenuViewTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5851EE523650877006A0CD9 /* MenuViewTests.swift */; };
 		B5851EE82366330E006A0CD9 /* LearnHowViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5851EE72366330E006A0CD9 /* LearnHowViewController.swift */; };
@@ -38,6 +39,7 @@
 		B5442187238AF3C7009C8473 /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
 		B544218923A6D905009C8473 /* LevelIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelIntroView.swift; sourceTree = "<group>"; };
 		B544218B23A94B4B009C8473 /* TokenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenView.swift; sourceTree = "<group>"; };
+		B544218D23ABDD94009C8473 /* GridView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GridView.swift; sourceTree = "<group>"; };
 		B5851EE32353BA4D006A0CD9 /* UIExtension.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = UIExtension.swift; sourceTree = "<group>"; };
 		B5851EE523650877006A0CD9 /* MenuViewTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MenuViewTests.swift; sourceTree = "<group>"; };
 		B5851EE72366330E006A0CD9 /* LearnHowViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LearnHowViewController.swift; sourceTree = "<group>"; };
@@ -100,6 +102,7 @@
 				B5DBB35D2352627700C971FC /* MenuViewController.swift */,
 				B5DBB37D23526F1300C971FC /* MenuView.swift */,
 				B5D45A1123819D0B007E24C1 /* GameViewController.swift */,
+				B544218D23ABDD94009C8473 /* GridView.swift */,
 				B5442187238AF3C7009C8473 /* TimerView.swift */,
 				B544218923A6D905009C8473 /* LevelIntroView.swift */,
 				B5851EE72366330E006A0CD9 /* LearnHowViewController.swift */,
@@ -227,6 +230,7 @@
 				B5D45A1223819D0B007E24C1 /* GameViewController.swift in Sources */,
 				B5DBB35E2352627700C971FC /* MenuViewController.swift in Sources */,
 				B544218C23A94B4B009C8473 /* TokenView.swift in Sources */,
+				B544218E23ABDD94009C8473 /* GridView.swift in Sources */,
 				B5DBB37E23526F1300C971FC /* MenuView.swift in Sources */,
 				B5DBB35A2352627700C971FC /* AppDelegate.swift in Sources */,
 				B544218A23A6D906009C8473 /* LevelIntroView.swift in Sources */,

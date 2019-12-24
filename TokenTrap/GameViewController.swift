@@ -11,6 +11,23 @@ import UIKit
 struct GameData {
     var level = 0
     var score = 0
+    var tokenIDCounter = TokenID.counterStart
+}
+
+typealias TokenID = Int
+extension TokenID {
+    static var notSet = -1
+    static var counterStart = 0
+
+    mutating func incremented() -> TokenID {
+        self += 1
+        return self
+    }
+}
+
+struct TokenData {
+    var attributes: TokenAttributes
+    var id = TokenID.notSet
 }
 
 class GameViewController: UIViewController {
@@ -18,8 +35,9 @@ class GameViewController: UIViewController {
     var gameData = GameData()
 
     var addRowTimer: Timer?
+    var addRowTimerInterval = 1.2
     let addRowCountLimit = 4
-    var addRowCount = 0
+    var addRowCount = 1
 
     var expertModeOn = false
     var trainingModeOn = false
@@ -63,9 +81,9 @@ class GameViewController: UIViewController {
         return view
     }()
 
-    lazy var gridView: UIView = {
-        let view = UIView()
-        view.backgroundColor = UIColor.white.withAlphaComponent(0.1)
+    lazy var gridView: GridView = {
+        let view = GridView()
+        view.controller = self
         return view
     }()
 
@@ -174,13 +192,20 @@ class GameViewController: UIViewController {
     }
 
     func addRow() {
-        // to come
+        var data = [TokenData]()
+
+        for _ in 0 ..< gridView.gridSize {
+            data.append(TokenData(attributes: (TokenColor.random(), TokenIcon.random()),
+                                  id: gameData.tokenIDCounter.incremented()))
+        }
+
+        gridView.addRow(data: data)
     }
 
     func startAddRowTimer() {
         addRowTimer?.invalidate()
 
-        addRowTimer = Timer.scheduledTimer(timeInterval: 1,
+        addRowTimer = Timer.scheduledTimer(timeInterval: addRowTimerInterval,
                                            target: self,
                                            selector: #selector(handleAddRowTimer),
                                            userInfo: nil,
@@ -188,14 +213,18 @@ class GameViewController: UIViewController {
     }
 
     @objc func handleAddRowTimer() {
-        if addRowCount < addRowCountLimit {
-            addRowCount += 1
-        } else {
+        timerView.update(count: addRowCount)
+
+        if addRowCount == addRowCountLimit {
             addRowCount = 0
             addRow()
+        } else {
+            addRowCount += 1
         }
+    }
 
-        timerView.update(count: addRowCount)
+    func tokenTapped(tokenView: TokenView) {
+        print(tokenView.id)
     }
 
     func setUpConstraints() {
