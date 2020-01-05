@@ -258,4 +258,25 @@ class GridView: UIView {
         rows.append(row)
         showRow(row)
     }
+
+    func blockTokenTaps() {
+        for row in rows {
+            row.tokens.forEach { $0.isUserInteractionEnabled = false }
+        }
+    }
+
+    func clearGrid() {
+        var views = backgroundViews
+        rows.forEach {
+            views.append(contentsOf: $0.tokens)
+        }
+
+        let fadeViews: AnimationItem = (0.3, {
+            views.forEach { $0.alpha = 0 }
+        })
+        UIView.executeAnimationSequence([fadeViews]) {
+            self.rows.forEach { self.cleanUpHiddenRow($0) }
+            self.rows.removeAll()
+        }
+    }
 }

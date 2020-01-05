@@ -12,6 +12,11 @@ struct GameData {
     var level = 0
     var score = 0
     var tokenIDCounter = TokenID.counterStart
+    var rows = [[TokenData]]()
+
+    var canAddRow: Bool {
+        rows.count < GridSize.standard
+    }
 }
 
 typealias TokenID = Int
@@ -95,7 +100,7 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = UIColor.background
+        view.backgroundColor = .background
         view.addNoMaskSubviews([gridView,
                                 timerView,
                                 levelIntroView,
@@ -199,6 +204,7 @@ class GameViewController: UIViewController {
                                   id: gameData.tokenIDCounter.incremented()))
         }
 
+        gameData.rows.append(data)
         gridView.addRow(data: data)
     }
 
@@ -216,11 +222,24 @@ class GameViewController: UIViewController {
         timerView.update(count: addRowCount)
 
         if addRowCount == addRowCountLimit {
+            guard gameData.canAddRow else {
+                endGame()
+                return
+            }
+
             addRowCount = 0
             addRow()
         } else {
             addRowCount += 1
         }
+    }
+
+    func endGame() {
+        addRowTimer?.invalidate()
+        timerView.updateForGameOver()
+        gridView.blockTokenTaps()
+        gridView.clearGrid()
+        gameData.rows.removeAll()
     }
 
     func tokenTapped(tokenView: TokenView) {

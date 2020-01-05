@@ -18,7 +18,7 @@ class TimerView: UIView {
 
         for index in 0 ..< indicatorCount {
             let indicator = UIView()
-            indicator.backgroundColor = UIColor.darkGreen
+            indicator.backgroundColor = .darkGreen
             indicator.layer.cornerRadius = weight / 2.0
             indicators.append(indicator)
         }
@@ -68,7 +68,11 @@ class TimerView: UIView {
 
     func update(count: Int) {
         for (index, indicator) in indicators.enumerated() {
-            indicator.backgroundColor = index < count ? UIColor.green : UIColor.darkGreen
+            indicator.backgroundColor = index < count ? .green : .darkGreen
         }
+    }
+
+    func updateForGameOver() {
+        indicators.forEach { $0.backgroundColor = .red }
     }
 }
