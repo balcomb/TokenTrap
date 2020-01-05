@@ -17,9 +17,9 @@ enum TokenIcon: String {
     case notSet
 
     static func random() -> TokenIcon {
-        [TokenIcon.die,
-         TokenIcon.face,
-         TokenIcon.star].randomElement()!
+        [.die,
+         .face,
+         .star].randomElement()!
     }
 }
 
@@ -30,9 +30,9 @@ enum TokenColor: String {
     case notSet
 
     static func random() -> TokenColor {
-        [TokenColor.blue,
-         TokenColor.gray,
-         TokenColor.red].randomElement()!
+        [.blue,
+         .gray,
+         .red].randomElement()!
     }
 }
 
@@ -70,7 +70,7 @@ class TokenView: UIView {
             return
         }
 
-        backgroundColor = UIColor.white
+        backgroundColor = .white
         addNoMaskSubviews([iconView])
         setUpConstraints()
     }

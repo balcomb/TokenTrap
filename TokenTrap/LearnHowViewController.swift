@@ -38,8 +38,8 @@ class LearnHowViewController: UIViewController {
 
     lazy var headlineLabel: UILabel = {
         let headlineLabel = self.defaultLabel(text: "TokenTrap is a challenging action-\u{2060}puzzle game requiring logical thinking under pressure")
-        headlineLabel.textColor = UIColor.gold
-        headlineLabel.font = UIFont.boldSystemFont(ofSize: 22)
+        headlineLabel.textColor = .gold
+        headlineLabel.font = .boldSystemFont(ofSize: 22)
         return headlineLabel
     }()
 
@@ -78,7 +78,7 @@ class LearnHowViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
-        view.backgroundColor = UIColor.background
+        view.backgroundColor = .background
         addViews()
         addConstraints()
     }
@@ -222,8 +222,8 @@ class LearnHowViewController: UIViewController {
     func defaultLabel(text: String) -> UILabel {
         let label = UILabel()
         label.text = text
-        label.textColor = UIColor.white
-        label.font = UIFont.boldSystemFont(ofSize: 18)
+        label.textColor = .white
+        label.font = .boldSystemFont(ofSize: 18)
         label.numberOfLines = 0
 
         return label
@@ -232,7 +232,7 @@ class LearnHowViewController: UIViewController {
     func bodyLabel(text: String) -> UILabel {
         let label = defaultLabel(text: text)
         label.textColor = UIColor(white: 1, alpha: 0.8)
-        label.font = UIFont.boldSystemFont(ofSize: 16)
+        label.font = .boldSystemFont(ofSize: 16)
 
         return label
     }
@@ -250,7 +250,7 @@ class LearnHowViewController: UIViewController {
     func tokenGroup(_ tokenAttributes: [TokenAttributes], caption: String) -> TokenGroup {
         let tokens = tokenList(tokenAttributes)
         let captionLabel = defaultLabel(text: caption)
-        captionLabel.font = UIFont.boldSystemFont(ofSize: 12)
+        captionLabel.font = .boldSystemFont(ofSize: 12)
         captionLabel.textAlignment = .center
 
         return (tokens[0], tokens[1], captionLabel)

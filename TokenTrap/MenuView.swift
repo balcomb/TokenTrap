@@ -51,9 +51,9 @@ class MenuView: UIView {
 
     lazy var playButton: UIButton = {
         let playButton = UIButton()
-        playButton.backgroundColor = UIColor.buttonBlue
+        playButton.backgroundColor = .buttonBlue
         playButton.setTitle("Play", for: .normal)
-        playButton.titleLabel?.font = UIFont.boldSystemFont(ofSize: ceil(self.baseFontSize * 1.2))
+        playButton.titleLabel?.font = .boldSystemFont(ofSize: ceil(self.baseFontSize * 1.2))
         playButton.layer.cornerRadius = self.buttonCornerRadius
         playButton.alpha = 0;
         playButton.addTarget(self,
@@ -65,7 +65,7 @@ class MenuView: UIView {
     lazy var skillLabel: UILabel = {
         let skillLabel = UILabel()
         skillLabel.text = "SKILL LEVEL"
-        skillLabel.font = UIFont.boldSystemFont(ofSize: floor(self.baseFontSize * 0.8))
+        skillLabel.font = .boldSystemFont(ofSize: floor(self.baseFontSize * 0.8))
         skillLabel.textColor = UIColor(named: "skillColor")
         skillLabel.alpha = 0;
         return skillLabel
@@ -77,7 +77,7 @@ class MenuView: UIView {
         let tintColor = UIColor(named: "logoBlue")
 
         if #available(iOS 13.0, *) {
-            skillControl.backgroundColor = UIColor.buttonBlue
+            skillControl.backgroundColor = .buttonBlue
             skillControl.selectedSegmentTintColor = tintColor
         } else {
             skillControl.tintColor = tintColor
@@ -130,7 +130,7 @@ class MenuView: UIView {
     func outlineButton(title: String) -> UIButton {
         let button = UIButton()
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = UIFont.boldSystemFont(ofSize: baseFontSize)
+        button.titleLabel?.font = .boldSystemFont(ofSize: baseFontSize)
         button.layer.borderColor = UIColor.buttonBlue.cgColor
         button.layer.borderWidth = 1
         button.layer.cornerRadius = self.buttonCornerRadius

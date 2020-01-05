@@ -17,8 +17,8 @@ class LevelIntroView: UIView {
     lazy var levelLabel: UILabel = {
         let label = UILabel()
         label.text = "Level X"
-        label.font = UIFont.boldSystemFont(ofSize: 14)
-        label.textColor = UIColor.white
+        label.font = .boldSystemFont(ofSize: 14)
+        label.textColor = .white
 
         return label
     }()
@@ -26,7 +26,7 @@ class LevelIntroView: UIView {
     lazy var targetLabel: UILabel = {
         let label = UILabel()
         label.text = "Target"
-        label.font = UIFont.boldSystemFont(ofSize: 12)
+        label.font = .boldSystemFont(ofSize: 12)
         label.textColor = UIColor(white: 1,
                                   alpha: 0.6)
         return label
@@ -51,7 +51,7 @@ class LevelIntroView: UIView {
 
     func setUpStyle() {
         alpha = 0
-        backgroundColor = UIColor.background
+        backgroundColor = .background
         layer.cornerRadius = 8
         layer.borderColor = UIColor.white.cgColor
         layer.borderWidth = 1
