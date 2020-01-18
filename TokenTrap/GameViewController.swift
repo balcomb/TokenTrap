@@ -235,11 +235,29 @@ class GameViewController: UIViewController {
     }
 
     func endGame() {
+        processStats()
         addRowTimer?.invalidate()
         timerView.updateForGameOver()
         gridView.blockTokenTaps()
         gridView.clearGrid()
         gameData.rows.removeAll()
+    }
+
+    func processStats() {
+        let trainingModeOff = !trainingModeOn
+        let score = gameData.score
+        let isExpertMode = expertModeOn
+
+        StatRequest.getStats(expertModeOn: isExpertMode) { rawData in
+            if let statsFromServer = rawData {
+                print(statsFromServer)
+            }
+
+            guard trainingModeOff && score > 0 else { return }
+
+            StatRequest.updateStats(score: score,
+                                    expertModeOn: isExpertMode)
+        }
     }
 
     func tokenTapped(tokenView: TokenView) {
