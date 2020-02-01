@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		B51305B223DE515600978B19 /* GameOverView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B51305B123DE515600978B19 /* GameOverView.swift */; };
 		B5442188238AF3C7009C8473 /* TimerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B5442187238AF3C7009C8473 /* TimerView.swift */; };
 		B544218A23A6D906009C8473 /* LevelIntroView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B544218923A6D905009C8473 /* LevelIntroView.swift */; };
 		B544218C23A94B4B009C8473 /* TokenView.swift in Sources */ = {isa = PBXBuildFile; fileRef = B544218B23A94B4B009C8473 /* TokenView.swift */; };
@@ -37,6 +38,7 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		B51305B123DE515600978B19 /* GameOverView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = GameOverView.swift; sourceTree = "<group>"; };
 		B5442187238AF3C7009C8473 /* TimerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TimerView.swift; sourceTree = "<group>"; };
 		B544218923A6D905009C8473 /* LevelIntroView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LevelIntroView.swift; sourceTree = "<group>"; };
 		B544218B23A94B4B009C8473 /* TokenView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TokenView.swift; sourceTree = "<group>"; };
@@ -107,6 +109,7 @@
 				B544218D23ABDD94009C8473 /* GridView.swift */,
 				B5442187238AF3C7009C8473 /* TimerView.swift */,
 				B544218923A6D905009C8473 /* LevelIntroView.swift */,
+				B51305B123DE515600978B19 /* GameOverView.swift */,
 				B54FE62723CD44AA00900947 /* StatData.swift */,
 				B5851EE72366330E006A0CD9 /* LearnHowViewController.swift */,
 				B544218B23A94B4B009C8473 /* TokenView.swift */,
@@ -241,6 +244,7 @@
 				B5851EE82366330E006A0CD9 /* LearnHowViewController.swift in Sources */,
 				B5442188238AF3C7009C8473 /* TimerView.swift in Sources */,
 				B5DBB35C2352627700C971FC /* SceneDelegate.swift in Sources */,
+				B51305B223DE515600978B19 /* GameOverView.swift in Sources */,
 				B54FE62823CD44AA00900947 /* StatData.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

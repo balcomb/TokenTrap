@@ -74,13 +74,12 @@ class MenuView: UIView {
     lazy var skillControl: UISegmentedControl = {
         let skillControl = UISegmentedControl(items: ["Basic", "Expert"])
         skillControl.selectedSegmentIndex = 0
-        let tintColor = UIColor(named: "logoBlue")
 
         if #available(iOS 13.0, *) {
             skillControl.backgroundColor = .buttonBlue
-            skillControl.selectedSegmentTintColor = tintColor
+            skillControl.selectedSegmentTintColor = .logoBlue
         } else {
-            skillControl.tintColor = tintColor
+            skillControl.tintColor = .logoBlue
             skillControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white],
                                                 for: .selected)
         }

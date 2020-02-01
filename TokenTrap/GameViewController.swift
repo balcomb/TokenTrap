@@ -49,6 +49,15 @@ class GameViewController: UIViewController {
     var orientationConstraints = ViewConstraints()
     lazy var timerView = TimerView()
 
+    lazy var gameOverView: GameOverView = {
+        let gameOverView = GameOverView()
+        gameOverView.alpha = 0
+        view.addNoMaskSubviews([gameOverView])
+        gameOverView.setUpConstraints(anchorView: gridView)
+
+        return gameOverView
+    }()
+
     lazy var targetTokenView: TokenView = {
         let targetToken = TokenView()
         targetToken.alpha = 0
@@ -248,9 +257,12 @@ class GameViewController: UIViewController {
         let score = gameData.score
         let isExpertMode = expertModeOn
 
-        StatRequest.getStats(expertModeOn: isExpertMode) { rawData in
-            if let statsFromServer = rawData {
-                print(statsFromServer)
+        StatRequest.getStats(expertModeOn: isExpertMode) { statsFromServer in
+            let stats = statsFromServer != nil ? statsFromServer! : StatData.defaultStats(expertModeOn: self.expertModeOn)
+
+            DispatchQueue.main.async {
+                self.gameOverView.renderStats(score: score,
+                                              statData: stats)
             }
 
             guard trainingModeOff && score > 0 else { return }
