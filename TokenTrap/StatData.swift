@@ -80,7 +80,7 @@ struct StatData: Decodable {
 
 struct StatRequest {
 
-    static func components(_ pathName: String) -> URLComponents {
+    static func baseComponents(pathName: String) -> URLComponents {
         var components = URLComponents()
         components.scheme = "http"
         components.host = "tokentrap.com"
@@ -98,7 +98,7 @@ struct StatRequest {
 
     static func updateStats(score: Int,
                             expertModeOn: Bool) {
-        var components = self.components("updateStats")
+        var components = self.baseComponents(pathName: "updateStats")
         components.queryItems = [self.levelQueryItem(expertModeOn),
                                  URLQueryItem(name: "ios",
                                               value: "1"),
@@ -111,31 +111,21 @@ struct StatRequest {
 
     static func getStats(expertModeOn: Bool,
                          completion: @escaping (_ data: StatData?) -> Void) {
-        var needsCompletion = true
-        let completionHandler = { (statData: StatData?) in
-            guard needsCompletion else { return }
-            needsCompletion = false
-            completion(statData)
-        }
-
-        Timer.scheduledTimer(withTimeInterval: 3,
-                             repeats: false) { _ in
-            completionHandler(nil)
-        }
-
-        var components = self.components("getStats")
+        var components = self.baseComponents(pathName: "getStats")
         components.queryItems = [self.levelQueryItem(expertModeOn)]
 
         guard let url = components.url else { return }
+        var request = URLRequest(url: url)
+        request.timeoutInterval = 3
 
-        URLSession.shared.dataTask(with: url) { (data, response, error) in
-            completionHandler(self.decodeStatData(data))
+        URLSession.shared.dataTask(with: request) { (data, response, error) in
+            completion(self.decodeStatData(data))
         }
         .resume()
     }
 
     static func decodeStatData(_ rawData: Data?) -> StatData? {
-        var statData: StatData? = nil
+        var statData: StatData?
 
         if let data = rawData {
             do {
