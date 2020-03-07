@@ -51,7 +51,7 @@ class GridRow: Equatable {
     }
 
     init?(data: [TokenData], view: GridView) {
-        guard data.count == view.gridSize else {
+        guard data.count == GridView.size else {
             return nil
         }
 
@@ -72,32 +72,20 @@ class GridRow: Equatable {
     }
 }
 
-typealias GridSize = Int
-extension GridSize {
-    static var standard = 8
-}
-
 class GridView: UIView {
 
-    weak var controller: GameViewController?
+    static let size = 8
+    static let padding = CGFloat(2)
 
-    let gridSize = GridSize.standard
-    let gridPadding = CGFloat(2)
+    weak var controller: GameViewController?
 
     lazy var rows = [GridRow]()
     lazy var tokenConstraints = [TokenID: TokenConstraints]()
 
-    lazy var widthMultiplier: CGFloat = {
-        1.0 / CGFloat(gridSize)
-    }()
-    lazy var widthConstant: CGFloat = {
-        -(gridPadding + (gridPadding * widthMultiplier))
-    }()
-
     lazy var backgroundViews: [UIView] = {
         var views = [UIView]()
 
-        for index in 0 ..< gridSize * gridSize {
+        for index in 0 ..< GridView.size * GridView.size {
             let view = UIView()
             view.backgroundColor = UIColor.black.withAlphaComponent(0.15)
             views.append(view)
@@ -128,24 +116,27 @@ class GridView: UIView {
 
         for (index, view) in backgroundViews.enumerated() {
             // first view in row anchors to superview left, other views anchor to previous view right
-            let anchorForLeft = index % gridSize == 0 ? leftAnchor : backgroundViews[index - 1].rightAnchor
+            let anchorForLeft = index % GridView.size == 0 ? leftAnchor : backgroundViews[index - 1].rightAnchor
             // first row anchors to superview top, other views anchor to bottom of view above
-            let anchorForTop = index < gridSize ? topAnchor : backgroundViews[index - gridSize].bottomAnchor
+            let anchorForTop = index < GridView.size ? topAnchor : backgroundViews[index - GridView.size].bottomAnchor
 
             var constraints = tokenSizeConstraints(view: view)
             constraints.append(contentsOf: [view.leftAnchor.constraint(equalTo: anchorForLeft,
-                                                                       constant: gridPadding),
+                                                                       constant: GridView.padding),
                                             view.topAnchor.constraint(equalTo: anchorForTop,
-                                                                      constant: gridPadding)])
+                                                                      constant: GridView.padding)])
             constraints.forEach { $0.isActive = true }
         }
     }
 
     func tokenSizeConstraints(view: UIView) -> [NSLayoutConstraint] {
-        [view.widthAnchor.constraint(equalTo: widthAnchor,
-                                     multiplier: widthMultiplier,
-                                     constant: widthConstant),
-         view.heightAnchor.constraint(equalTo: view.widthAnchor)]
+        let widthMultiplier = 1.0 / CGFloat(GridView.size)
+        let widthConstant = -(GridView.padding + (GridView.padding * widthMultiplier))
+
+        return [view.widthAnchor.constraint(equalTo: widthAnchor,
+                                            multiplier: widthMultiplier,
+                                            constant: widthConstant),
+                view.heightAnchor.constraint(equalTo: view.widthAnchor)]
     }
 
     @objc func handleTokenTap(tap: UITapGestureRecognizer) {
@@ -164,7 +155,7 @@ class GridView: UIView {
 
         let constraints = TokenConstraints(xPosition: row.primeToken.leftAnchor.constraint(equalTo: rightAnchor),
                                            yPosition: row.primeToken.bottomAnchor.constraint(equalTo: yAnchor,
-                                                                                             constant: -gridPadding))
+                                                                                             constant: -GridView.padding))
 
         for (index, token) in row.tokens.enumerated() {
             constraints.otherConstraints.append(contentsOf: tokenSizeConstraints(view: token))
@@ -172,7 +163,7 @@ class GridView: UIView {
             if token != row.primeToken {
                 constraints.otherConstraints.append(contentsOf: [token.topAnchor.constraint(equalTo: row.primeToken.topAnchor),
                                                                  token.leftAnchor.constraint(equalTo: row.tokens[index - 1].rightAnchor,
-                                                                                             constant: gridPadding)])
+                                                                                             constant: GridView.padding)])
             }
         }
 
@@ -186,7 +177,7 @@ class GridView: UIView {
         guard let constraints = tokenConstraints[row.primeToken.id] else { return }
 
         constraints.xPositionConstraint = row.primeToken.leftAnchor.constraint(equalTo: leftAnchor,
-                                                                               constant: gridPadding)
+                                                                               constant: GridView.padding)
         let slideInRow: AnimationItem = (0.3, {
             self.layoutIfNeeded()
         })
@@ -220,7 +211,7 @@ class GridView: UIView {
         // prime token above row being removed anchors to either superview bottom or top of the prime token beneath
         let anchor = index == 0 ? bottomAnchor : rows[index - 1].primeToken.topAnchor
         aboveConstraints.yPositionConstraint = firstTokenAbove.bottomAnchor.constraint(equalTo: anchor,
-                                                                                       constant: -gridPadding)
+                                                                                       constant: -GridView.padding)
         layoutIfNeeded()
     }
 

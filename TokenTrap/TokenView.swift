@@ -56,6 +56,7 @@ class TokenView: UIView {
 
     convenience init(_ attributes: TokenAttributes) {
         self.init()
+        backgroundColor = .white
         DispatchQueue.main.async {
             self.color = attributes.color
             self.icon = attributes.icon
@@ -70,7 +71,6 @@ class TokenView: UIView {
             return
         }
 
-        backgroundColor = .white
         addNoMaskSubviews([iconView])
         setUpConstraints()
     }

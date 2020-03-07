@@ -10,7 +10,6 @@ import UIKit
 
 class LevelIntroView: UIView {
 
-    let targetTokenSize = CGFloat(44)
     let margin = CGFloat(22)
     let padding = CGFloat(8)
 
@@ -32,6 +31,8 @@ class LevelIntroView: UIView {
         return label
     }()
 
+    lazy var targetTokenPlaceholder = UIView()
+
     override func willMove(toSuperview newSuperview: UIView?) {
         super.willMove(toSuperview: newSuperview)
 
@@ -41,8 +42,8 @@ class LevelIntroView: UIView {
 
         setUpStyle()
         addNoMaskSubviews([levelLabel,
-                           targetLabel])
-        setUpConstraints()
+                           targetLabel,
+                           targetTokenPlaceholder])
     }
 
     func updateLevel(_ level: Int) {
@@ -57,16 +58,20 @@ class LevelIntroView: UIView {
         layer.borderWidth = 1
     }
 
-    func setUpConstraints() {
-        let constraints = [levelLabel.topAnchor.constraint(equalTo: topAnchor,
+    func setUpConstraints(_ gridView: GridView) {
+        var constraints = [levelLabel.topAnchor.constraint(equalTo: topAnchor,
                                                            constant: margin),
                            levelLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
                            targetLabel.topAnchor.constraint(equalTo: levelLabel.bottomAnchor,
                                                             constant: padding),
                            targetLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-                           bottomAnchor.constraint(equalTo: targetLabel.bottomAnchor,
-                                                   constant: targetTokenSize + margin + padding),
+                           targetTokenPlaceholder.topAnchor.constraint(equalTo: targetLabel.bottomAnchor,
+                                                                       constant: padding),
+                           targetTokenPlaceholder.centerXAnchor.constraint(equalTo: centerXAnchor),
+                           bottomAnchor.constraint(equalTo: targetTokenPlaceholder.bottomAnchor,
+                                                   constant: margin),
                            widthAnchor.constraint(equalTo: heightAnchor)]
+        constraints.append(contentsOf: gridView.tokenSizeConstraints(view: targetTokenPlaceholder))
         constraints.forEach { $0.isActive = true }
     }
 }

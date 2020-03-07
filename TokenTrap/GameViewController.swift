@@ -15,7 +15,7 @@ struct GameData {
     var rows = [[TokenData]]()
 
     var canAddRow: Bool {
-        rows.count < GridSize.standard
+        rows.count < GridView.size
     }
 }
 
@@ -61,6 +61,7 @@ class GameViewController: UIViewController {
     lazy var targetTokenView: TokenView = {
         let targetToken = TokenView()
         targetToken.alpha = 0
+        targetToken.backgroundColor = .targetYellow
         targetToken.isUserInteractionEnabled = false
         return targetToken
     }()
@@ -72,13 +73,14 @@ class GameViewController: UIViewController {
     }()
 
     lazy var targetTokenFullConstraints: ViewConstraints = {
+        let constant = CGFloat(-16)
         var constraints = ViewConstraints()
         constraints.addForOrientation(landscape: [targetTokenView.rightAnchor.constraint(equalTo: timerView.leftAnchor,
-                                                                                         constant: -levelIntroView.targetTokenSize),
+                                                                                         constant: constant),
                                                   targetTokenView.centerYAnchor.constraint(equalTo: gridView.centerYAnchor)],
                                       portrait: [targetTokenView.centerXAnchor.constraint(equalTo: gridView.centerXAnchor),
                                                  targetTokenView.bottomAnchor.constraint(equalTo: timerView.topAnchor,
-                                                                                         constant: -levelIntroView.targetTokenSize)])
+                                                                                         constant: constant)])
         return constraints
     }()
 
@@ -208,7 +210,7 @@ class GameViewController: UIViewController {
     func addRow() {
         var data = [TokenData]()
 
-        for _ in 0 ..< gridView.gridSize {
+        for _ in 0 ..< GridView.size {
             data.append(TokenData(attributes: (TokenColor.random(), TokenIcon.random()),
                                   id: gameData.tokenIDCounter.incremented()))
         }
@@ -282,11 +284,11 @@ class GameViewController: UIViewController {
         orientationConstraints.merge(timerView.indicatorConstraints)
         setUpIntroConstraints()
         setUpTargetConstraints()
+        levelIntroView.setUpConstraints(gridView)
     }
 
     func setUpTargetConstraints() {
-        let constraints = [targetTokenView.widthAnchor.constraint(equalToConstant: levelIntroView.targetTokenSize),
-                           targetTokenView.heightAnchor.constraint(equalToConstant: levelIntroView.targetTokenSize)]
+        let constraints = gridView.tokenSizeConstraints(view: targetTokenView)
         constraints.forEach { $0.isActive = true }
     }
 

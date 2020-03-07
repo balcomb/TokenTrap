@@ -89,6 +89,9 @@ extension UIColor {
     open class var logoBlue: UIColor {
         UIColor(named: "logoBlue")!
     }
+    open class var targetYellow: UIColor {
+        UIColor(named: "targetYellow")!
+    }
     open class var darkGreen: UIColor {
         UIColor(red: 0, green: 0.35, blue: 0, alpha: 1)
     }
