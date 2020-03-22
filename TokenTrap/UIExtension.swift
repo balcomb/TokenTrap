@@ -76,6 +76,39 @@ extension UIView {
     }
 }
 
+typealias MenuIcon = UIView
+extension MenuIcon {
+    static var standard: MenuIcon {
+        MenuIcon.renderIcon(barWidth: 28, barHeight: 3)
+    }
+
+    static func renderIcon(barWidth: CGFloat,
+                           barHeight: CGFloat) -> UIView {
+        let icon = MenuIcon()
+        icon.isUserInteractionEnabled = false
+
+        for index in 0 ... 2 {
+            let bar = UIView(frame: CGRect(x: 0,
+                                           y: CGFloat(index) * (2.5 * barHeight),
+                                           width: barWidth,
+                                           height: barHeight))
+            bar.backgroundColor = .white
+            bar.layer.cornerRadius = barHeight / 2
+
+            icon.addSubview(bar)
+
+            if index == 2 {
+                icon.frame = CGRect(x: 0,
+                                    y: 0,
+                                    width: barWidth,
+                                    height: bar.frame.maxY)
+            }
+        }
+
+        return icon
+    }
+}
+
 extension UIColor {
     open class var gold: UIColor {
         UIColor(named: "gold")!

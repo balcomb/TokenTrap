@@ -35,6 +35,68 @@ struct TokenData {
     var id = TokenID.notSet
 }
 
+class MenuButton: UIButton {
+    lazy var icon = MenuIcon.standard
+
+    convenience init(gameController: GameViewController,
+                     action: Selector) {
+        self.init()
+        gameController.view.addNoMaskSubviews([self])
+        self.addNoMaskSubviews([icon])
+        self.addTarget(gameController,
+                       action: action,
+                       for: .touchUpInside)
+    }
+
+    func setUpConstraints(gameController: GameViewController) {
+        let padding = CGFloat(24)
+        let constraints = [self.widthAnchor.constraint(equalToConstant: icon.frame.size.width + padding),
+                           self.heightAnchor.constraint(equalToConstant: icon.frame.size.height + padding),
+                           self.leftAnchor.constraint(equalTo: gameController.view.safeAreaLayoutGuide.leftAnchor),
+                           self.topAnchor.constraint(equalTo: gameController.view.safeAreaLayoutGuide.topAnchor),
+                           icon.widthAnchor.constraint(equalToConstant: icon.frame.size.width),
+                           icon.heightAnchor.constraint(equalToConstant: icon.frame.size.height),
+                           icon.centerXAnchor.constraint(equalTo: self.centerXAnchor),
+                           icon.centerYAnchor.constraint(equalTo: self.centerYAnchor)]
+        constraints.forEach {
+            $0.isActive = true
+        }
+    }
+}
+
+typealias MenuClosure = (UIAlertAction) -> Void
+extension UIAlertController {
+    static func showMenuDialog(gameController: GameViewController,
+                               endClosure: @escaping MenuClosure,
+                               resumeClosure: @escaping MenuClosure) {
+
+        let pauseController = UIAlertController(title: "Game Paused",
+                                                message: nil,
+                                                preferredStyle: .actionSheet)
+
+        if let popoverController = pauseController.popoverPresentationController {
+            popoverController.sourceView = gameController.view
+            popoverController.sourceRect = CGRect(x: gameController.view.bounds.midX,
+                                                  y: gameController.view.bounds.midY,
+                                                  width: 0,
+                                                  height: 0)
+            popoverController.permittedArrowDirections = []
+        }
+
+        let endGame = UIAlertAction(title: "End Game",
+                                    style: .destructive,
+                                    handler: endClosure)
+        let resumeGame = UIAlertAction(title: "Resume",
+                                       style: .default,
+                                       handler: resumeClosure)
+        pauseController.addAction(endGame)
+        pauseController.addAction(resumeGame)
+        gameController.present(pauseController,
+                               animated: true,
+                               completion: nil)
+    }
+}
+
 class GameViewController: UIViewController {
 
     var gameData = GameData()
@@ -47,7 +109,16 @@ class GameViewController: UIViewController {
     var expertModeOn = false
     var trainingModeOn = false
     var orientationConstraints = ViewConstraints()
+
+    var menuIsShowing = false {
+        didSet {
+            gridView.updateForMenuState(isShowing: menuIsShowing)
+        }
+    }
+
     lazy var timerView = TimerView()
+    lazy var menuButton = MenuButton(gameController: self,
+                                     action: #selector(self.handleMenuButton))
 
     lazy var gameOverView: GameOverView = {
         let gameOverView = GameOverView()
@@ -115,7 +186,8 @@ class GameViewController: UIViewController {
         view.addNoMaskSubviews([gridView,
                                 timerView,
                                 levelIntroView,
-                                targetTokenView])
+                                targetTokenView,
+                                menuButton])
         setUpConstraints()
     }
 
@@ -168,6 +240,10 @@ class GameViewController: UIViewController {
     }
 
     @objc func finishLevelStart() {
+        guard !menuIsShowing else {
+            return
+        }
+
         self.hideLevelIntro {
             self.addRow()
             self.startAddRowTimer()
@@ -230,6 +306,10 @@ class GameViewController: UIViewController {
     }
 
     @objc func handleAddRowTimer() {
+        guard !menuIsShowing else {
+            return
+        }
+
         timerView.update(count: addRowCount)
 
         if addRowCount == addRowCountLimit {
@@ -278,6 +358,22 @@ class GameViewController: UIViewController {
         print(tokenView.id)
     }
 
+    @objc func handleMenuButton() {
+        menuIsShowing = true
+
+        let endClosure: MenuClosure = { _ in
+            self.addRowTimer?.invalidate()
+            self.dismiss(animated: true, completion: nil)
+        }
+        let resumeClosure: MenuClosure = { _ in
+            self.menuIsShowing = false
+            self.finishLevelStart()
+        }
+        UIAlertController.showMenuDialog(gameController: self,
+                                         endClosure: endClosure,
+                                         resumeClosure: resumeClosure)
+    }
+
     func setUpConstraints() {
         setUpGridConstraints()
         setUpTimerConstraints()
@@ -285,6 +381,7 @@ class GameViewController: UIViewController {
         setUpIntroConstraints()
         setUpTargetConstraints()
         levelIntroView.setUpConstraints(gridView)
+        menuButton.setUpConstraints(gameController: self)
     }
 
     func setUpTargetConstraints() {

@@ -82,6 +82,17 @@ class GridView: UIView {
     lazy var rows = [GridRow]()
     lazy var tokenConstraints = [TokenID: TokenConstraints]()
 
+    lazy var tokenContainer: UIView = {
+        let container = UIView()
+        addNoMaskSubviews([container])
+        let constraints = [container.widthAnchor.constraint(equalTo: widthAnchor),
+                           container.heightAnchor.constraint(equalTo: heightAnchor),
+                           container.centerXAnchor.constraint(equalTo: centerXAnchor),
+                           container.centerYAnchor.constraint(equalTo: centerYAnchor)]
+        constraints.forEach { $0.isActive = true }
+        return container
+    }()
+
     lazy var backgroundViews: [UIView] = {
         var views = [UIView]()
 
@@ -104,6 +115,7 @@ class GridView: UIView {
         layer.masksToBounds = true
         backgroundColor = UIColor.white.withAlphaComponent(0.1)
         layoutGrid()
+        bringSubviewToFront(tokenContainer)
     }
 
     override func layoutSubviews() {
@@ -244,7 +256,7 @@ class GridView: UIView {
     func addRow(data: [TokenData]) {
         guard let row = GridRow(data: data, view: self) else { return }
 
-        addNoMaskSubviews(row.tokens)
+        tokenContainer.addNoMaskSubviews(row.tokens)
         setUpRowConstraints(row)
         rows.append(row)
         showRow(row)
@@ -269,5 +281,9 @@ class GridView: UIView {
             self.rows.forEach { self.cleanUpHiddenRow($0) }
             self.rows.removeAll()
         }
+    }
+
+    func updateForMenuState(isShowing: Bool) {
+        tokenContainer.isHidden = isShowing
     }
 }
