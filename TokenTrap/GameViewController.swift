@@ -8,31 +8,11 @@
 
 import UIKit
 
-struct GameData {
-    var level = 0
-    var score = 0
-    var tokenIDCounter = TokenID.counterStart
-    var rows = [[TokenData]]()
-
-    var canAddRow: Bool {
-        rows.count < GridView.size
-    }
-}
-
-typealias TokenID = Int
-extension TokenID {
-    static var notSet = -1
-    static var counterStart = 0
-
-    mutating func incremented() -> TokenID {
-        self += 1
-        return self
-    }
-}
-
-struct TokenData {
-    var attributes: TokenAttributes
-    var id = TokenID.notSet
+enum TokenTapResult {
+    case firstSelection
+    case partialMatch(tokens: TokenPair)
+    case mismatch(tokens: TokenPair)
+    case targetMatch(tokens: TokenPair)
 }
 
 class MenuButton: UIButton {
@@ -225,8 +205,9 @@ class GameViewController: UIViewController {
     }
 
     func updateTargetToken() {
-        targetTokenView.color = TokenColor.random()
-        targetTokenView.icon = TokenIcon.random()
+        gameData.targetAttributes = (TokenColor.random(), TokenIcon.random())
+        targetTokenView.color = gameData.targetAttributes.color
+        targetTokenView.icon = gameData.targetAttributes.icon
     }
 
     func startLevel() {
@@ -287,8 +268,9 @@ class GameViewController: UIViewController {
         var data = [TokenData]()
 
         for _ in 0 ..< GridView.size {
-            data.append(TokenData(attributes: (TokenColor.random(), TokenIcon.random()),
-                                  id: gameData.tokenIDCounter.incremented()))
+            let tokenData = TokenData(attributes: (TokenColor.random(), TokenIcon.random()))
+            tokenData.id = gameData.tokenIDCounter.incremented()
+            data.append(tokenData)
         }
 
         gameData.rows.append(data)
@@ -354,8 +336,27 @@ class GameViewController: UIViewController {
         }
     }
 
-    func tokenTapped(tokenView: TokenView) {
-        print(tokenView.id)
+    func tokenTapped(tokenID: TokenID) {
+        print("tokenTapped " + String(tokenID))
+        guard let result = gameData.processTokenTap(tokenID: tokenID) else {
+            // TODO: end game?
+            return
+        }
+
+        switch result {
+        case .firstSelection:
+            print("first tap")
+            gridView.updateForFirstSelection(tokenID: tokenID)
+        case .mismatch(let tokens):
+            print("clear")
+            gridView.updateForMismatch(tokens)
+        case .partialMatch(let tokens):
+            print("update")
+            gridView.updateForPartialMatch(tokens)
+        case .targetMatch(let tokens):
+            print("remove")
+            gridView.updateForTargetMatch(tokens)
+        }
     }
 
     @objc func handleMenuButton() {

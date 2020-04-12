@@ -125,6 +125,12 @@ extension UIColor {
     open class var targetYellow: UIColor {
         UIColor(named: "targetYellow")!
     }
+    open class var selectedGreen: UIColor {
+        UIColor(red: 0.7, green: 1, blue: 0.7, alpha: 1)
+    }
+    open class var mismatchRed: UIColor {
+        UIColor(red: 1, green: 0.8, blue: 0.9, alpha: 1)
+    }
     open class var darkGreen: UIColor {
         UIColor(red: 0, green: 0.35, blue: 0, alpha: 1)
     }

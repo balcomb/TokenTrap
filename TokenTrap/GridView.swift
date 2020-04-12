@@ -151,11 +151,6 @@ class GridView: UIView {
                 view.heightAnchor.constraint(equalTo: view.widthAnchor)]
     }
 
-    @objc func handleTokenTap(tap: UITapGestureRecognizer) {
-        guard let token = tap.view as? TokenView else { return }
-        controller?.tokenTapped(tokenView: token)
-    }
-
     func setUpRowConstraints(_ row: GridRow) {
         /**
          * The prime token anchors to superview right before animating, and either
@@ -237,6 +232,80 @@ class GridView: UIView {
         }
 
         return nil
+    }
+
+    func tokenView(forID tokenID: TokenID) -> TokenView? {
+        for row in rows {
+            for token in row.tokens {
+                if token.id == tokenID {
+                    return token
+                }
+            }
+        }
+
+        return nil
+    }
+
+    @objc func handleTokenTap(tap: UITapGestureRecognizer) {
+        guard let token = tap.view as? TokenView else { return }
+        controller?.tokenTapped(tokenID: token.id)
+    }
+
+    func handleUpdateError()  {
+        // TODO: end game?
+    }
+
+    func updateForFirstSelection(tokenID: TokenID) {
+        guard let token = tokenView(forID: tokenID) else {
+            handleUpdateError()
+            return
+        }
+
+        token.highlight = .selected
+    }
+
+    func updateForMismatch(_ pairData: TokenPair) {
+        guard let tokenView1 = tokenView(forID: pairData.data1.id),
+            let tokenView2 = tokenView(forID: pairData.data2.id) else {
+            handleUpdateError()
+            return
+        }
+
+        tokenView1.highlight = .mismatch
+        tokenView2.highlight = .mismatch
+
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(300)) {
+            tokenView1.highlight = .normal
+            tokenView2.highlight = .normal
+        }
+    }
+
+    func updateForPartialMatch(_ pairData: TokenPair) {
+        guard let tokenView1 = tokenView(forID: pairData.data1.id),
+            let tokenView2 = tokenView(forID: pairData.data2.id) else {
+            handleUpdateError()
+            return
+        }
+
+        tokenView1.update(withData: pairData.data1)
+        tokenView2.update(withData: pairData.data2)
+    }
+
+    func updateForTargetMatch(_ pairData: TokenPair) {
+        guard let tokenView1 = tokenView(forID: pairData.data1.id),
+            let tokenView2 = tokenView(forID: pairData.data2.id) else {
+            handleUpdateError()
+            return
+        }
+
+        tokenView1.update(withData: pairData.data1,
+                          highlight: .targetMatch)
+        tokenView2.update(withData: pairData.data2,
+                          highlight: .targetMatch) {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(300)) {
+                self.removeRow(tokenID: pairData.data1.id)
+            }
+        }
     }
 
     func removeRow(tokenID: TokenID) {
