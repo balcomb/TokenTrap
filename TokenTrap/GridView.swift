@@ -72,6 +72,54 @@ class GridRow: Equatable {
     }
 }
 
+struct TokenViewPair {
+    var tViews: (TokenView, TokenView)
+
+    func updateHighlight(_ highlight: TokenHighlight) {
+        tViews.0.highlight = highlight
+        tViews.1.highlight = highlight
+    }
+
+    func update(withData data: TokenData,
+                highlight: TokenHighlight = .normal,
+                completion: (() -> Void)? = nil) {
+        tViews.0.update(withData: data,
+                        highlight: highlight)
+        tViews.1.update(withData: data,
+                        highlight: highlight,
+                        completion: completion)
+    }
+}
+
+typealias TokenViewMap = [TokenID: TokenView]
+extension TokenViewMap {
+
+    func tokenView(forID id: TokenID) -> TokenView? {
+        guard let tView = self[id] else {
+            handleMissingIDs([id])
+            return nil
+        }
+
+        return tView
+    }
+
+    func tokenViewPair(forDataPair tDataPair: TokenPair) -> TokenViewPair? {
+        guard let tView1 = self[tDataPair.data1.id],
+            let tView2 = self[tDataPair.data2.id] else {
+
+            handleMissingIDs([tDataPair.data1.id, tDataPair.data2.id])
+            return nil
+        }
+
+        return TokenViewPair(tViews: (tView1, tView2))
+    }
+
+    func handleMissingIDs(_ tokenIDs: [TokenID]) {
+        print("TokenID errer: " + tokenIDs.debugDescription)
+        // TODO: end game?
+    }
+}
+
 class GridView: UIView {
 
     static let size = 8
@@ -80,6 +128,7 @@ class GridView: UIView {
     weak var controller: GameViewController?
 
     lazy var rows = [GridRow]()
+    lazy var tViewMap = TokenViewMap()
     lazy var tokenConstraints = [TokenID: TokenConstraints]()
 
     lazy var tokenContainer: UIView = {
@@ -223,23 +272,11 @@ class GridView: UIView {
     }
 
     func rowForID(tokenID: TokenID) -> GridRow? {
-        for row in rows {
-            for token in row.tokens {
-                if token.id == tokenID {
-                    return row
-                }
-            }
-        }
+        guard let tView = tViewMap.tokenView(forID: tokenID) else { return nil }
 
-        return nil
-    }
-
-    func tokenView(forID tokenID: TokenID) -> TokenView? {
         for row in rows {
-            for token in row.tokens {
-                if token.id == tokenID {
-                    return token
-                }
+            if row.tokens.contains(tView) {
+                return row
             }
         }
 
@@ -251,57 +288,27 @@ class GridView: UIView {
         controller?.tokenTapped(tokenID: token.id)
     }
 
-    func handleUpdateError()  {
-        // TODO: end game?
-    }
-
     func updateForFirstSelection(tokenID: TokenID) {
-        guard let token = tokenView(forID: tokenID) else {
-            handleUpdateError()
-            return
-        }
-
-        token.highlight = .selected
+        tViewMap.tokenView(forID: tokenID)?.highlight = .selected
     }
 
     func updateForMismatch(_ pairData: TokenPair) {
-        guard let tokenView1 = tokenView(forID: pairData.data1.id),
-            let tokenView2 = tokenView(forID: pairData.data2.id) else {
-            handleUpdateError()
-            return
-        }
+        guard let tViewPair = tViewMap.tokenViewPair(forDataPair: pairData) else { return }
 
-        tokenView1.highlight = .mismatch
-        tokenView2.highlight = .mismatch
+        tViewPair.updateHighlight(.mismatch)
 
         DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(300)) {
-            tokenView1.highlight = .normal
-            tokenView2.highlight = .normal
+            tViewPair.updateHighlight(.normal)
         }
     }
 
     func updateForPartialMatch(_ pairData: TokenPair) {
-        guard let tokenView1 = tokenView(forID: pairData.data1.id),
-            let tokenView2 = tokenView(forID: pairData.data2.id) else {
-            handleUpdateError()
-            return
-        }
-
-        tokenView1.update(withData: pairData.data1)
-        tokenView2.update(withData: pairData.data2)
+        tViewMap.tokenViewPair(forDataPair: pairData)?.update(withData: pairData.data1)
     }
 
     func updateForTargetMatch(_ pairData: TokenPair) {
-        guard let tokenView1 = tokenView(forID: pairData.data1.id),
-            let tokenView2 = tokenView(forID: pairData.data2.id) else {
-            handleUpdateError()
-            return
-        }
-
-        tokenView1.update(withData: pairData.data1,
-                          highlight: .targetMatch)
-        tokenView2.update(withData: pairData.data2,
-                          highlight: .targetMatch) {
+        tViewMap.tokenViewPair(forDataPair: pairData)?.update(withData: pairData.data1,
+                                                              highlight: .targetMatch) {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(300)) {
                 self.removeRow(tokenID: pairData.data1.id)
             }
@@ -317,14 +324,18 @@ class GridView: UIView {
     }
 
     func cleanUpHiddenRow(_ row: GridRow) {
-        row.tokens.forEach { $0.removeFromSuperview() }
+        row.tokens.forEach {
+            $0.removeFromSuperview()
+            tViewMap.removeValue(forKey: $0.id)
+        }
         rows.removeAll { $0 == row }
         tokenConstraints.removeValue(forKey: row.primeToken.id)?.isActive = false
     }
 
-    func addRow(data: [TokenData]) {
+    func addRow(_ data: [TokenData]) {
         guard let row = GridRow(data: data, view: self) else { return }
 
+        row.tokens.forEach { tViewMap[$0.id] = $0 }
         tokenContainer.addNoMaskSubviews(row.tokens)
         setUpRowConstraints(row)
         rows.append(row)

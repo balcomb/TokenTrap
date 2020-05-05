@@ -265,16 +265,7 @@ class GameViewController: UIViewController {
     }
 
     func addRow() {
-        var data = [TokenData]()
-
-        for _ in 0 ..< GridView.size {
-            let tokenData = TokenData(attributes: (TokenColor.random(), TokenIcon.random()))
-            tokenData.id = gameData.tokenIDCounter.incremented()
-            data.append(tokenData)
-        }
-
-        gameData.rows.append(data)
-        gridView.addRow(data: data)
+        gridView.addRow(gameData.nextRow())
     }
 
     func startAddRowTimer() {

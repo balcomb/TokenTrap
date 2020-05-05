@@ -39,22 +39,25 @@ class GameData {
     var rows = [[TokenData]]()
     var selectedToken: TokenData?
     var targetAttributes: TokenAttributes = (TokenColor.notSet, TokenIcon.notSet)
+    var tDataMap = [TokenID: TokenData]()
 
     var canAddRow: Bool {
         rows.count < GridView.size
     }
 
-    func tokenDataForID(_ tokenID: TokenID) -> TokenData? {
+    func nextRow() -> [TokenData] {
+        var data = [TokenData]()
 
-        for row in rows {
-            for tokenData in row {
-                if tokenData.id == tokenID {
-                    return tokenData
-                }
-            }
+        for _ in 0 ..< GridView.size {
+            let tokenData = TokenData(attributes: (TokenColor.random(), TokenIcon.random()))
+            tokenData.id = tokenIDCounter.incremented()
+            data.append(tokenData)
+            tDataMap[tokenData.id] = tokenData
         }
 
-        return nil
+        rows.append(data)
+
+        return data
     }
 
     func rowIndexForID(_ tokenID: TokenID) -> Int? {
@@ -75,11 +78,15 @@ class GameData {
             return
         }
 
+        for tokenData in rows[index] {
+            tDataMap.removeValue(forKey: tokenData.id)
+        }
+
         rows.remove(at: index)
     }
 
     func processTokenTap(tokenID: TokenID) -> TokenTapResult? {
-        guard let currentToken = tokenDataForID(tokenID) else {
+        guard let currentToken = tDataMap[tokenID] else {
             return nil
         }
 
