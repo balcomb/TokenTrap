@@ -10,9 +10,9 @@ import UIKit
 
 enum TokenTapResult {
     case firstSelection
-    case partialMatch(tokens: TokenPair)
-    case mismatch(tokens: TokenPair)
-    case targetMatch(tokens: TokenPair)
+    case partialMatch(tDataPair: TokenDataPair)
+    case mismatch(tDataPair: TokenDataPair)
+    case targetMatch(tDataPair: TokenDataPair)
 }
 
 class MenuButton: UIButton {
@@ -338,15 +338,15 @@ class GameViewController: UIViewController {
         case .firstSelection:
             print("first tap")
             gridView.updateForFirstSelection(tokenID: tokenID)
-        case .mismatch(let tokens):
+        case .mismatch(let tDataPair):
             print("clear")
-            gridView.updateForMismatch(tokens)
-        case .partialMatch(let tokens):
+            gridView.updateForMismatch(tDataPair)
+        case .partialMatch(let tDataPair):
             print("update")
-            gridView.updateForPartialMatch(tokens)
-        case .targetMatch(let tokens):
+            gridView.updateForPartialMatch(tDataPair)
+        case .targetMatch(let tDataPair):
             print("remove")
-            gridView.updateForTargetMatch(tokens)
+            gridView.updateForTargetMatch(tDataPair)
         }
     }
 

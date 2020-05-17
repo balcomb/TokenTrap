@@ -46,24 +46,24 @@ class GameData {
     }
 
     func nextRow() -> [TokenData] {
-        var data = [TokenData]()
+        var rowData = [TokenData]()
 
         for _ in 0 ..< GridView.size {
-            let tokenData = TokenData(attributes: (TokenColor.random(), TokenIcon.random()))
-            tokenData.id = tokenIDCounter.incremented()
-            data.append(tokenData)
-            tDataMap[tokenData.id] = tokenData
+            let tData = TokenData(attributes: (TokenColor.random(), TokenIcon.random()))
+            tData.id = tokenIDCounter.incremented()
+            rowData.append(tData)
+            tDataMap[tData.id] = tData
         }
 
-        rows.append(data)
+        rows.append(rowData)
 
-        return data
+        return rowData
     }
 
     func rowIndexForID(_ tokenID: TokenID) -> Int? {
         for (index, row) in rows.enumerated() {
-            for token in row {
-                if token.id == tokenID {
+            for tData in row {
+                if tData.id == tokenID {
                     return index
                 }
             }
@@ -78,8 +78,8 @@ class GameData {
             return
         }
 
-        for tokenData in rows[index] {
-            tDataMap.removeValue(forKey: tokenData.id)
+        for tData in rows[index] {
+            tDataMap.removeValue(forKey: tData.id)
         }
 
         rows.remove(at: index)
@@ -96,47 +96,47 @@ class GameData {
         }
 
         selectedToken = nil
-        let selectedPair = TokenPair(data1: currentToken, data2: previousToken)
+        let selectedPair = TokenDataPair(tData1: currentToken, tData2: previousToken)
 
         guard selectedPair.isPartialMatch else {
-            return .mismatch(tokens: selectedPair)
+            return .mismatch(tDataPair: selectedPair)
         }
 
-        return processPartialMatch(tokens: selectedPair)
+        return processPartialMatch(tDataPair: selectedPair)
     }
 
-    func processPartialMatch(tokens: TokenPair) -> TokenTapResult {
-        tokens.updateAttributesForPartialMatch()
-        let relation = getPairRelation(tokens)
+    func processPartialMatch(tDataPair: TokenDataPair) -> TokenTapResult {
+        tDataPair.updateAttributesForPartialMatch()
+        let relation = getPairRelation(tDataPair)
 
         switch relation {
         case .adjacent:
-            return .partialMatch(tokens: tokens)
+            return .partialMatch(tDataPair: tDataPair)
         case .adjacentInRow:
-            if tokens.data1.attributes == targetAttributes {
-                removeRowForMatch(tokenID: tokens.data1.id)
-                return .targetMatch(tokens: tokens)
+            if tDataPair.tData1.attributes == targetAttributes {
+                removeRowForMatch(tokenID: tDataPair.tData1.id)
+                return .targetMatch(tDataPair: tDataPair)
             } else {
-                return .partialMatch(tokens: tokens)
+                return .partialMatch(tDataPair: tDataPair)
             }
         case .notAdjacent:
-            return .mismatch(tokens: tokens)
+            return .mismatch(tDataPair: tDataPair)
         }
     }
 
-    func getPairRelation(_ tokens: TokenPair) -> TokenPairRelation {
+    func getPairRelation(_ tDataPair: TokenDataPair) -> TokenPairRelation {
         for (index, row) in rows.enumerated() {
 
-            guard let token1Index = row.firstIndex(of: tokens.data1) else {
+            guard let tData1Index = row.firstIndex(of: tDataPair.tData1) else {
                 continue
             }
 
-            if let token2Index = row.firstIndex(of: tokens.data2), abs(token1Index - token2Index) == 1 {
+            if let tData2Index = row.firstIndex(of: tDataPair.tData2), abs(tData1Index - tData2Index) == 1 {
                 return .adjacentInRow
             }
 
             for adjacentRow in adjacentRows(at: index) {
-                if let token2Index = adjacentRow.firstIndex(of: tokens.data2), token1Index == token2Index {
+                if let tData2Index = adjacentRow.firstIndex(of: tDataPair.tData2), tData1Index == tData2Index {
                     return .adjacent
                 }
             }
@@ -166,33 +166,33 @@ enum TokenPairRelation {
     case notAdjacent
 }
 
-struct TokenPair {
-    var data1: TokenData
-    var data2: TokenData
+struct TokenDataPair {
+    var tData1: TokenData
+    var tData2: TokenData
 
     var isPartialMatch: Bool {
-        data1.attributes != data2.attributes
-            && (data1.attributes.color == data2.attributes.color || data1.attributes.icon == data2.attributes.icon)
+        tData1.attributes != tData2.attributes
+            && (tData1.attributes.color == tData2.attributes.color || tData1.attributes.icon == tData2.attributes.icon)
     }
 
     func updateAttributesForPartialMatch() {
         guard isPartialMatch else { return }
 
-        if data1.attributes.color == data2.attributes.color {
-            let pairIcons: Set<TokenIcon> = [data1.attributes.icon,
-                                             data2.attributes.icon]
+        if tData1.attributes.color == tData2.attributes.color {
+            let pairIcons: Set<TokenIcon> = [tData1.attributes.icon,
+                                             tData2.attributes.icon]
             if let newIcon = excludedAttribute(allAttributes: TokenIcon.iconSet(), pairAttributes: pairIcons) {
-                data1.attributes.icon = newIcon
-                data2.attributes.icon = newIcon
+                tData1.attributes.icon = newIcon
+                tData2.attributes.icon = newIcon
             }
         } else
 
-        if data1.attributes.icon == data2.attributes.icon {
-            let pairColors: Set<TokenColor> = [data1.attributes.color,
-                                               data2.attributes.color]
+        if tData1.attributes.icon == tData2.attributes.icon {
+            let pairColors: Set<TokenColor> = [tData1.attributes.color,
+                                               tData2.attributes.color]
             if let newColor = excludedAttribute(allAttributes: TokenColor.colorSet(), pairAttributes: pairColors) {
-                data1.attributes.color = newColor
-                data2.attributes.color = newColor
+                tData1.attributes.color = newColor
+                tData2.attributes.color = newColor
             }
         }
     }

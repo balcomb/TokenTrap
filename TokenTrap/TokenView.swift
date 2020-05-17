@@ -114,11 +114,11 @@ class TokenView: UIView {
         setUpConstraints()
     }
 
-    func update(withData tokenData: TokenData,
+    func update(withData tData: TokenData,
                 highlight: TokenHighlight = .normal,
                 completion: (() -> Void)? = nil) {
 
-        attributes = tokenData.attributes
+        attributes = tData.attributes
         self.highlight = highlight
         animateIconChange {
             completion?()

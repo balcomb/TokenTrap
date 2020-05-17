@@ -45,25 +45,25 @@ class TokenConstraints {
 }
 
 class GridRow: Equatable {
-    var tokens: [TokenView]
-    var primeToken: TokenView {
-        tokens.first!
+    var tViews: [TokenView]
+    var tViewPrime: TokenView {
+        tViews.first!
     }
 
-    init?(data: [TokenData], view: GridView) {
-        guard data.count == GridView.size else {
+    init?(rowData: [TokenData], view: GridView) {
+        guard rowData.count == GridView.size else {
             return nil
         }
 
-        tokens = [TokenView]()
+        tViews = [TokenView]()
 
-        for tokenData in data {
-            let token = TokenView(tokenData.attributes)
-            token.id = tokenData.id
+        for tData in rowData {
+            let tView = TokenView(tData.attributes)
+            tView.id = tData.id
             let tapGesture = UITapGestureRecognizer(target: view,
                                                     action: #selector(GridView.handleTokenTap(tap:)))
-            token.addGestureRecognizer(tapGesture)
-            tokens.append(token)
+            tView.addGestureRecognizer(tapGesture)
+            tViews.append(tView)
         }
     }
 
@@ -103,11 +103,11 @@ extension TokenViewMap {
         return tView
     }
 
-    func tokenViewPair(forDataPair tDataPair: TokenPair) -> TokenViewPair? {
-        guard let tView1 = self[tDataPair.data1.id],
-            let tView2 = self[tDataPair.data2.id] else {
+    func tokenViewPair(forDataPair tDataPair: TokenDataPair) -> TokenViewPair? {
+        guard let tView1 = self[tDataPair.tData1.id],
+            let tView2 = self[tDataPair.tData2.id] else {
 
-            handleMissingIDs([tDataPair.data1.id, tDataPair.data2.id])
+            handleMissingIDs([tDataPair.tData1.id, tDataPair.tData2.id])
             return nil
         }
 
@@ -131,7 +131,7 @@ class GridView: UIView {
     lazy var tViewMap = TokenViewMap()
     lazy var tokenConstraints = [TokenID: TokenConstraints]()
 
-    lazy var tokenContainer: UIView = {
+    lazy var tViewContainer: UIView = {
         let container = UIView()
         addNoMaskSubviews([container])
         let constraints = [container.widthAnchor.constraint(equalTo: widthAnchor),
@@ -164,7 +164,7 @@ class GridView: UIView {
         layer.masksToBounds = true
         backgroundColor = UIColor.white.withAlphaComponent(0.1)
         layoutGrid()
-        bringSubviewToFront(tokenContainer)
+        bringSubviewToFront(tViewContainer)
     }
 
     override func layoutSubviews() {
@@ -206,19 +206,19 @@ class GridView: UIView {
          * superview bottom or the top of the prime token beneath it.
          * This method must be called before a new row is added to rows.
          */
-        let viewForYAnchor: UIView = rows.last?.primeToken ?? self
+        let viewForYAnchor: UIView = rows.last?.tViewPrime ?? self
         let yAnchor = viewForYAnchor == self ? viewForYAnchor.bottomAnchor : viewForYAnchor.topAnchor
 
-        let constraints = TokenConstraints(xPosition: row.primeToken.leftAnchor.constraint(equalTo: rightAnchor),
-                                           yPosition: row.primeToken.bottomAnchor.constraint(equalTo: yAnchor,
+        let constraints = TokenConstraints(xPosition: row.tViewPrime.leftAnchor.constraint(equalTo: rightAnchor),
+                                           yPosition: row.tViewPrime.bottomAnchor.constraint(equalTo: yAnchor,
                                                                                              constant: -GridView.padding))
 
-        for (index, token) in row.tokens.enumerated() {
-            constraints.otherConstraints.append(contentsOf: tokenSizeConstraints(view: token))
+        for (index, tView) in row.tViews.enumerated() {
+            constraints.otherConstraints.append(contentsOf: tokenSizeConstraints(view: tView))
 
-            if token != row.primeToken {
-                constraints.otherConstraints.append(contentsOf: [token.topAnchor.constraint(equalTo: row.primeToken.topAnchor),
-                                                                 token.leftAnchor.constraint(equalTo: row.tokens[index - 1].rightAnchor,
+            if tView != row.tViewPrime {
+                constraints.otherConstraints.append(contentsOf: [tView.topAnchor.constraint(equalTo: row.tViewPrime.topAnchor),
+                                                                 tView.leftAnchor.constraint(equalTo: row.tViews[index - 1].rightAnchor,
                                                                                              constant: GridView.padding)])
             }
         }
@@ -226,13 +226,13 @@ class GridView: UIView {
         constraints.isActive = true
         layoutIfNeeded()
 
-        tokenConstraints[row.primeToken.id] = constraints
+        tokenConstraints[row.tViewPrime.id] = constraints
     }
 
     func showRow(_ row: GridRow) {
-        guard let constraints = tokenConstraints[row.primeToken.id] else { return }
+        guard let constraints = tokenConstraints[row.tViewPrime.id] else { return }
 
-        constraints.xPositionConstraint = row.primeToken.leftAnchor.constraint(equalTo: leftAnchor,
+        constraints.xPositionConstraint = row.tViewPrime.leftAnchor.constraint(equalTo: leftAnchor,
                                                                                constant: GridView.padding)
         let slideInRow: AnimationItem = (0.3, {
             self.layoutIfNeeded()
@@ -242,9 +242,9 @@ class GridView: UIView {
 
     func hideRow(_ row: GridRow,
                  completion: @escaping () -> Void) {
-        guard let constraints = tokenConstraints[row.primeToken.id] else { return }
+        guard let constraints = tokenConstraints[row.tViewPrime.id] else { return }
 
-        constraints.xPositionConstraint = row.primeToken.leftAnchor.constraint(equalTo: leftAnchor,
+        constraints.xPositionConstraint = row.tViewPrime.leftAnchor.constraint(equalTo: leftAnchor,
                                                                                constant: -frame.size.width)
         let slideOutRow: AnimationItem = (0.3, {
             self.layoutIfNeeded()
@@ -261,11 +261,11 @@ class GridView: UIView {
     func shiftRowsAbove(row: GridRow) {
         guard row != rows.last else { return }
         guard let index = rows.firstIndex(of: row) else { return }
-        let firstTokenAbove = rows[index + 1].primeToken
+        let firstTokenAbove = rows[index + 1].tViewPrime
         guard let aboveConstraints = tokenConstraints[firstTokenAbove.id] else { return }
 
         // prime token above row being removed anchors to either superview bottom or top of the prime token beneath
-        let anchor = index == 0 ? bottomAnchor : rows[index - 1].primeToken.topAnchor
+        let anchor = index == 0 ? bottomAnchor : rows[index - 1].tViewPrime.topAnchor
         aboveConstraints.yPositionConstraint = firstTokenAbove.bottomAnchor.constraint(equalTo: anchor,
                                                                                        constant: -GridView.padding)
         layoutIfNeeded()
@@ -275,7 +275,7 @@ class GridView: UIView {
         guard let tView = tViewMap.tokenView(forID: tokenID) else { return nil }
 
         for row in rows {
-            if row.tokens.contains(tView) {
+            if row.tViews.contains(tView) {
                 return row
             }
         }
@@ -284,16 +284,16 @@ class GridView: UIView {
     }
 
     @objc func handleTokenTap(tap: UITapGestureRecognizer) {
-        guard let token = tap.view as? TokenView else { return }
-        controller?.tokenTapped(tokenID: token.id)
+        guard let tView = tap.view as? TokenView else { return }
+        controller?.tokenTapped(tokenID: tView.id)
     }
 
     func updateForFirstSelection(tokenID: TokenID) {
         tViewMap.tokenView(forID: tokenID)?.highlight = .selected
     }
 
-    func updateForMismatch(_ pairData: TokenPair) {
-        guard let tViewPair = tViewMap.tokenViewPair(forDataPair: pairData) else { return }
+    func updateForMismatch(_ tDataPair: TokenDataPair) {
+        guard let tViewPair = tViewMap.tokenViewPair(forDataPair: tDataPair) else { return }
 
         tViewPair.updateHighlight(.mismatch)
 
@@ -302,15 +302,15 @@ class GridView: UIView {
         }
     }
 
-    func updateForPartialMatch(_ pairData: TokenPair) {
-        tViewMap.tokenViewPair(forDataPair: pairData)?.update(withData: pairData.data1)
+    func updateForPartialMatch(_ tDataPair: TokenDataPair) {
+        tViewMap.tokenViewPair(forDataPair: tDataPair)?.update(withData: tDataPair.tData1)
     }
 
-    func updateForTargetMatch(_ pairData: TokenPair) {
-        tViewMap.tokenViewPair(forDataPair: pairData)?.update(withData: pairData.data1,
+    func updateForTargetMatch(_ tDataPair: TokenDataPair) {
+        tViewMap.tokenViewPair(forDataPair: tDataPair)?.update(withData: tDataPair.tData1,
                                                               highlight: .targetMatch) {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(300)) {
-                self.removeRow(tokenID: pairData.data1.id)
+                self.removeRow(tokenID: tDataPair.tData1.id)
             }
         }
     }
@@ -324,19 +324,19 @@ class GridView: UIView {
     }
 
     func cleanUpHiddenRow(_ row: GridRow) {
-        row.tokens.forEach {
+        row.tViews.forEach {
             $0.removeFromSuperview()
             tViewMap.removeValue(forKey: $0.id)
         }
         rows.removeAll { $0 == row }
-        tokenConstraints.removeValue(forKey: row.primeToken.id)?.isActive = false
+        tokenConstraints.removeValue(forKey: row.tViewPrime.id)?.isActive = false
     }
 
-    func addRow(_ data: [TokenData]) {
-        guard let row = GridRow(data: data, view: self) else { return }
+    func addRow(_ rowData: [TokenData]) {
+        guard let row = GridRow(rowData: rowData, view: self) else { return }
 
-        row.tokens.forEach { tViewMap[$0.id] = $0 }
-        tokenContainer.addNoMaskSubviews(row.tokens)
+        row.tViews.forEach { tViewMap[$0.id] = $0 }
+        tViewContainer.addNoMaskSubviews(row.tViews)
         setUpRowConstraints(row)
         rows.append(row)
         showRow(row)
@@ -344,14 +344,14 @@ class GridView: UIView {
 
     func blockTokenTaps() {
         for row in rows {
-            row.tokens.forEach { $0.isUserInteractionEnabled = false }
+            row.tViews.forEach { $0.isUserInteractionEnabled = false }
         }
     }
 
     func clearGrid() {
         var views = backgroundViews
         rows.forEach {
-            views.append(contentsOf: $0.tokens)
+            views.append(contentsOf: $0.tViews)
         }
 
         let fadeViews: AnimationItem = (0.3, {
@@ -364,6 +364,6 @@ class GridView: UIView {
     }
 
     func updateForMenuState(isShowing: Bool) {
-        tokenContainer.isHidden = isShowing
+        tViewContainer.isHidden = isShowing
     }
 }
