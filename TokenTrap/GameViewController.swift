@@ -9,7 +9,7 @@
 import UIKit
 
 enum TokenTapResult {
-    case firstSelection
+    case firstSelection(tokenID: TokenID)
     case partialMatch(tDataPair: TokenDataPair)
     case mismatch(tDataPair: TokenDataPair)
     case targetMatch(tDataPair: TokenDataPair)
@@ -334,20 +334,7 @@ class GameViewController: UIViewController {
             return
         }
 
-        switch result {
-        case .firstSelection:
-            print("first tap")
-            gridView.updateForFirstSelection(tokenID: tokenID)
-        case .mismatch(let tDataPair):
-            print("clear")
-            gridView.updateForMismatch(tDataPair)
-        case .partialMatch(let tDataPair):
-            print("update")
-            gridView.updateForPartialMatch(tDataPair)
-        case .targetMatch(let tDataPair):
-            print("remove")
-            gridView.updateForTargetMatch(tDataPair)
-        }
+        gridView.processTokenTapResult(result)
     }
 
     @objc func handleMenuButton() {

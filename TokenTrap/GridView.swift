@@ -288,6 +288,20 @@ class GridView: UIView {
         controller?.tokenTapped(tokenID: tView.id)
     }
 
+    func processTokenTapResult(_ result: TokenTapResult) {
+
+        switch result {
+        case .firstSelection(let tokenID):
+            updateForFirstSelection(tokenID: tokenID)
+        case .mismatch(let tDataPair):
+            updateForMismatch(tDataPair)
+        case .partialMatch(let tDataPair):
+            updateForPartialMatch(tDataPair)
+        case .targetMatch(let tDataPair):
+            updateForTargetMatch(tDataPair)
+        }
+    }
+
     func updateForFirstSelection(tokenID: TokenID) {
         tViewMap.tokenView(forID: tokenID)?.highlight = .selected
     }

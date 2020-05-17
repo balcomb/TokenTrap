@@ -92,7 +92,7 @@ class GameData {
 
         guard let previousToken = selectedToken else {
             selectedToken = currentToken
-            return .firstSelection
+            return .firstSelection(tokenID: tokenID)
         }
 
         selectedToken = nil
