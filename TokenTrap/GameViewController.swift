@@ -299,32 +299,13 @@ class GameViewController: UIViewController {
     }
 
     func endGame() {
-        processStats()
         addRowTimer?.invalidate()
         timerView.updateForGameOver()
         gridView.blockTokenTaps()
         gridView.clearGrid()
         gameData.rows.removeAll()
-    }
-
-    func processStats() {
-        let trainingModeOff = !trainingModeOn
-        let score = gameData.score
-        let isExpertMode = expertModeOn
-
-        StatRequest.getStats(expertModeOn: isExpertMode) { statsFromServer in
-            let stats = statsFromServer != nil ? statsFromServer! : StatData.defaultStats(expertModeOn: self.expertModeOn)
-
-            DispatchQueue.main.async {
-                self.gameOverView.renderStats(score: score,
-                                              statData: stats)
-            }
-
-            guard trainingModeOff && score > 0 else { return }
-
-            StatRequest.updateStats(score: score,
-                                    expertModeOn: isExpertMode)
-        }
+        gameOverView.renderStats(score: gameData.score,
+                                 level: expertModeOn ? .expert : .basic)
     }
 
     func tokenTapped(tokenID: TokenID) {

@@ -52,7 +52,6 @@ class GameOverView: UIView {
         addNoMaskSubviews([gameOverLabel,
                            finalScoreLabel,
                            scoreLabel,
-                           averageScoreLabel,
                            personalAverageLabel])
 
         let constraints = [leftAnchor.constraint(equalTo: anchorView.leftAnchor),
@@ -70,35 +69,25 @@ class GameOverView: UIView {
                            gameOverLabel.bottomAnchor.constraint(equalTo: finalScoreLabel.topAnchor,
                                                                  constant: -gameOverLabel.font.pointSize),
 
-                           averageScoreLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-                           averageScoreLabel.topAnchor.constraint(equalTo: scoreLabel.bottomAnchor,
-                                                                  constant: gameOverLabel.font.pointSize),
-
                            personalAverageLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-                           personalAverageLabel.topAnchor.constraint(equalTo: averageScoreLabel.bottomAnchor)]
+                           personalAverageLabel.topAnchor.constraint(equalTo: scoreLabel.bottomAnchor,
+                                                                     constant: gameOverLabel.font.pointSize)]
 
         constraints.forEach { $0.isActive = true }
     }
 
-    func renderStats(score: Int,
-                     statData: StatData) {
+    func renderStats(score: Int, level: SkillLevel) {
 
-        if score >= statData.highScore {
-            gameOverLabel.text = "New High Score!"
-        } else if StatData.isPersonalBest(score: score, level: statData.level) {
+        if StatData.isPersonalBest(score: score, level: level) {
             gameOverLabel.text = "New Personal Best!"
         } else {
             gameOverLabel.text = "Game Over"
         }
 
         scoreLabel.text = String(score)
-        averageScoreLabel.text = averageLabelText(level: statData.level,
-                                                  forPersonal: false,
-                                                  score: statData.averageScore)
-        personalAverageLabel.text = averageLabelText(level: statData.level,
-                                                     forPersonal: true,
+        personalAverageLabel.text = averageLabelText(level: level,
                                                      score: StatData.updatedPersonalAverage(score: score,
-                                                                                            level: statData.level))
+                                                                                            level: level))
         let fadeIn: AnimationItem = (0.5, {
             self.alpha = 1
         })
@@ -106,20 +95,14 @@ class GameOverView: UIView {
     }
 
     func averageLabelText(level: SkillLevel,
-                          forPersonal: Bool,
                           score: Double) -> String {
         guard StatData.isValidAverageScore(score) else {
             return ""
         }
 
-        let mainText = " Average Score: " + String(format: "%.1f", score)
-
-        if forPersonal {
-            return "Your" + mainText
-        }
-
         let levelText = (level == .basic ? "Basic" : "Expert") + " Level"
+        let scoreText = String(format: "%.1f", score)
 
-        return levelText + mainText
+        return "Your " + levelText + " Average: "  + scoreText
     }
 }
