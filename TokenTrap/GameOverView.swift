@@ -39,6 +39,25 @@ class GameOverView: UIView {
         genericAverageLabel()
     }()
 
+    lazy var playAgainButton: PlayButton = {
+        let button = PlayButton(title: "Play Again")
+        button.addTarget(self,
+                         action: #selector(handlePlayAgainButton),
+                         for: .touchUpInside)
+        return button
+    }()
+
+    var playAgainAction: (() -> Void)?
+
+    convenience init(playAgainAction: @escaping () -> Void) {
+        self.init()
+        self.playAgainAction = playAgainAction
+    }
+
+    @objc func handlePlayAgainButton() {
+        playAgainAction?()
+    }
+
     func genericAverageLabel() -> UILabel {
         let label = UILabel()
         label.textColor = UIColor(white: 0.9,
@@ -52,28 +71,36 @@ class GameOverView: UIView {
         addNoMaskSubviews([gameOverLabel,
                            finalScoreLabel,
                            scoreLabel,
-                           personalAverageLabel])
+                           personalAverageLabel,
+                           playAgainButton])
 
-        let constraints = [leftAnchor.constraint(equalTo: anchorView.leftAnchor),
-                           rightAnchor.constraint(equalTo: anchorView.rightAnchor),
-                           topAnchor.constraint(equalTo: anchorView.topAnchor),
-                           bottomAnchor.constraint(equalTo: anchorView.bottomAnchor),
+        let playAgainPadding = CGFloat(24)
+        NSLayoutConstraint.activate([leftAnchor.constraint(equalTo: anchorView.leftAnchor),
+                                     rightAnchor.constraint(equalTo: anchorView.rightAnchor),
+                                     topAnchor.constraint(equalTo: anchorView.topAnchor),
+                                     bottomAnchor.constraint(equalTo: anchorView.bottomAnchor),
 
-                           scoreLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-                           scoreLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
+                                     scoreLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+                                     scoreLabel.centerYAnchor.constraint(equalTo: centerYAnchor),
 
-                           finalScoreLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-                           finalScoreLabel.bottomAnchor.constraint(equalTo: scoreLabel.topAnchor),
+                                     finalScoreLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+                                     finalScoreLabel.bottomAnchor.constraint(equalTo: scoreLabel.topAnchor),
 
-                           gameOverLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-                           gameOverLabel.bottomAnchor.constraint(equalTo: finalScoreLabel.topAnchor,
-                                                                 constant: -gameOverLabel.font.pointSize),
+                                     gameOverLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+                                     gameOverLabel.bottomAnchor.constraint(equalTo: finalScoreLabel.topAnchor,
+                                                                           constant: -gameOverLabel.font.pointSize),
 
-                           personalAverageLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
-                           personalAverageLabel.topAnchor.constraint(equalTo: scoreLabel.bottomAnchor,
-                                                                     constant: gameOverLabel.font.pointSize)]
+                                     personalAverageLabel.centerXAnchor.constraint(equalTo: centerXAnchor),
+                                     personalAverageLabel.topAnchor.constraint(equalTo: scoreLabel.bottomAnchor,
+                                                                               constant: personalAverageLabel.font.pointSize / 2),
 
-        constraints.forEach { $0.isActive = true }
+                                     playAgainButton.leftAnchor.constraint(equalTo: leftAnchor,
+                                                                           constant: playAgainPadding),
+                                     playAgainButton.rightAnchor.constraint(equalTo: rightAnchor,
+                                                                            constant: -playAgainPadding),
+                                     playAgainButton.heightAnchor.constraint(equalToConstant: PlayButton.height),
+                                     playAgainButton.bottomAnchor.constraint(equalTo: bottomAnchor,
+                                                                             constant: -playAgainPadding)])
     }
 
     func renderStats(score: Int, level: SkillLevel) {
@@ -88,10 +115,22 @@ class GameOverView: UIView {
         personalAverageLabel.text = averageLabelText(level: level,
                                                      score: StatData.updatedPersonalAverage(score: score,
                                                                                             level: level))
-        let fadeIn: AnimationItem = (0.5, {
-            self.alpha = 1
+        fade(alpha: 1)
+    }
+
+    func hide(completion: @escaping () -> Void) {
+        fade(alpha: 0) {
+            completion()
+        }
+    }
+
+    func fade(alpha: CGFloat, completion: (() -> Void)? = nil) {
+        let fade: AnimationItem = (0.5, {
+            self.alpha = alpha
         })
-        UIView.executeAnimationSequence([fadeIn])
+        UIView.executeAnimationSequence([fade]) {
+            completion?()
+        }
     }
 
     func averageLabelText(level: SkillLevel,

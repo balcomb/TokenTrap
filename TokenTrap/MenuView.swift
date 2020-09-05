@@ -9,22 +9,29 @@
 import Foundation
 import UIKit
 
+class PlayButton: UIButton {
+    static let height = CGFloat(44)
+
+    convenience init(title: String) {
+        self.init()
+        backgroundColor = .buttonBlue
+        setTitle(title, for: .normal)
+        titleLabel?.font = .boldSystemFont(ofSize: ceil(Self.baseFontSize * 1.2))
+        layer.cornerRadius = Self.buttonCornerRadius
+    }
+}
+
 class MenuView: UIView {
 
     unowned var viewController: MenuViewController
-
-    let playButtonHeight = CGFloat(44)
-    let baseFontSize = CGFloat(15)
-    let buttonCornerRadius = CGFloat(4)
-
     var viewConstraints = ViewConstraints()
 
     lazy var controlConstraints = [logo.topAnchor.constraint(equalTo: topAnchor),
                                    logo.leftAnchor.constraint(equalTo: leftAnchor),
 
-                                   playButton.topAnchor.constraint(equalTo: logo.bottomAnchor, constant: playButtonHeight / 2),
+                                   playButton.topAnchor.constraint(equalTo: logo.bottomAnchor, constant: PlayButton.height / 2),
                                    playButton.centerXAnchor.constraint(equalTo: logo.centerXAnchor),
-                                   playButton.heightAnchor.constraint(equalToConstant: playButtonHeight),
+                                   playButton.heightAnchor.constraint(equalToConstant: PlayButton.height),
                                    playButton.widthAnchor.constraint(equalTo: logo.widthAnchor),
 
                                    skillLabel.topAnchor.constraint(equalTo: playButton.bottomAnchor, constant: skillLabel.font.pointSize),
@@ -50,11 +57,7 @@ class MenuView: UIView {
     }()
 
     lazy var playButton: UIButton = {
-        let playButton = UIButton()
-        playButton.backgroundColor = .buttonBlue
-        playButton.setTitle("Play", for: .normal)
-        playButton.titleLabel?.font = .boldSystemFont(ofSize: ceil(self.baseFontSize * 1.2))
-        playButton.layer.cornerRadius = self.buttonCornerRadius
+        let playButton = PlayButton(title: "Play")
         playButton.alpha = 0;
         playButton.addTarget(self,
                              action: #selector(self.handlePlayTap),
@@ -65,7 +68,7 @@ class MenuView: UIView {
     lazy var skillLabel: UILabel = {
         let skillLabel = UILabel()
         skillLabel.text = "SKILL LEVEL"
-        skillLabel.font = .boldSystemFont(ofSize: floor(self.baseFontSize * 0.8))
+        skillLabel.font = .boldSystemFont(ofSize: floor(Self.baseFontSize * 0.8))
         skillLabel.textColor = UIColor(named: "skillColor")
         skillLabel.alpha = 0;
         return skillLabel
@@ -85,7 +88,7 @@ class MenuView: UIView {
         }
 
         skillControl.setTitleTextAttributes([NSAttributedString.Key.foregroundColor: UIColor.white,
-                                             NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: self.baseFontSize)],
+                                             NSAttributedString.Key.font: UIFont.boldSystemFont(ofSize: Self.baseFontSize)],
                                             for: .normal)
         skillControl.alpha = 0;
         skillControl.addTarget(self,
@@ -129,10 +132,10 @@ class MenuView: UIView {
     func outlineButton(title: String) -> UIButton {
         let button = UIButton()
         button.setTitle(title, for: .normal)
-        button.titleLabel?.font = .boldSystemFont(ofSize: baseFontSize)
+        button.titleLabel?.font = .boldSystemFont(ofSize: Self.baseFontSize)
         button.layer.borderColor = UIColor.buttonBlue.cgColor
         button.layer.borderWidth = 1
-        button.layer.cornerRadius = self.buttonCornerRadius
+        button.layer.cornerRadius = Self.buttonCornerRadius
         button.alpha = 0
 
         return button

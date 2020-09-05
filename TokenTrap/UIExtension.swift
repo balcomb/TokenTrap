@@ -53,6 +53,9 @@ typealias AnimationItem = (duration: TimeInterval, animation: () -> Void)
 
 extension UIView {
 
+    static let buttonCornerRadius = CGFloat(4)
+    static let baseFontSize = CGFloat(15)
+
     static func executeAnimationSequence(_ animations: [AnimationItem],
                                          completion: (() -> Void)? = nil) {
         guard let item = animations.first else {

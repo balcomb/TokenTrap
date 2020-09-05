@@ -368,12 +368,23 @@ class GridView: UIView {
             views.append(contentsOf: $0.tViews)
         }
 
-        let fadeViews: AnimationItem = (0.3, {
-            views.forEach { $0.alpha = 0 }
-        })
-        UIView.executeAnimationSequence([fadeViews]) {
+        fade(alpha: 0, views: views) {
             self.rows.forEach { self.cleanUpHiddenRow($0) }
             self.rows.removeAll()
+        }
+    }
+
+    func showBackground() {
+        fade(alpha: 1,
+             views: backgroundViews)
+    }
+
+    func fade(alpha: CGFloat, views: [UIView], completion: (() -> Void)? = nil) {
+        let fade: AnimationItem = (0.3, {
+            views.forEach { $0.alpha = alpha }
+        })
+        UIView.executeAnimationSequence([fade]) {
+            completion?()
         }
     }
 

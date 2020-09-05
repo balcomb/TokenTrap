@@ -22,25 +22,22 @@ class MenuButton: UIButton {
                      action: Selector) {
         self.init()
         gameController.view.addNoMaskSubviews([self])
-        self.addNoMaskSubviews([icon])
-        self.addTarget(gameController,
-                       action: action,
-                       for: .touchUpInside)
+        addNoMaskSubviews([icon])
+        addTarget(gameController,
+                  action: action,
+                  for: .touchUpInside)
     }
 
     func setUpConstraints(gameController: GameViewController) {
         let padding = CGFloat(24)
-        let constraints = [self.widthAnchor.constraint(equalToConstant: icon.frame.size.width + padding),
-                           self.heightAnchor.constraint(equalToConstant: icon.frame.size.height + padding),
-                           self.leftAnchor.constraint(equalTo: gameController.view.safeAreaLayoutGuide.leftAnchor),
-                           self.topAnchor.constraint(equalTo: gameController.view.safeAreaLayoutGuide.topAnchor),
-                           icon.widthAnchor.constraint(equalToConstant: icon.frame.size.width),
-                           icon.heightAnchor.constraint(equalToConstant: icon.frame.size.height),
-                           icon.centerXAnchor.constraint(equalTo: self.centerXAnchor),
-                           icon.centerYAnchor.constraint(equalTo: self.centerYAnchor)]
-        constraints.forEach {
-            $0.isActive = true
-        }
+        NSLayoutConstraint.activate([widthAnchor.constraint(equalToConstant: icon.frame.size.width + padding),
+                                     heightAnchor.constraint(equalToConstant: icon.frame.size.height + padding),
+                                     leftAnchor.constraint(equalTo: gameController.view.safeAreaLayoutGuide.leftAnchor),
+                                     topAnchor.constraint(equalTo: gameController.view.safeAreaLayoutGuide.topAnchor),
+                                     icon.widthAnchor.constraint(equalToConstant: icon.frame.size.width),
+                                     icon.heightAnchor.constraint(equalToConstant: icon.frame.size.height),
+                                     icon.centerXAnchor.constraint(equalTo: centerXAnchor),
+                                     icon.centerYAnchor.constraint(equalTo: centerYAnchor)])
     }
 }
 
@@ -50,7 +47,7 @@ extension UIAlertController {
                                endClosure: @escaping MenuClosure,
                                resumeClosure: @escaping MenuClosure) {
 
-        let pauseController = UIAlertController(title: "Game Paused",
+        let pauseController = UIAlertController(title: gameController.gameIsOver ? nil : "Game Paused",
                                                 message: nil,
                                                 preferredStyle: .actionSheet)
 
@@ -63,10 +60,10 @@ extension UIAlertController {
             popoverController.permittedArrowDirections = []
         }
 
-        let endGame = UIAlertAction(title: "End Game",
+        let endGame = UIAlertAction(title: gameController.gameIsOver ? "Main Menu" : "End Game",
                                     style: .destructive,
                                     handler: endClosure)
-        let resumeGame = UIAlertAction(title: "Resume",
+        let resumeGame = UIAlertAction(title: gameController.gameIsOver ? "Cancel" : "Resume",
                                        style: .default,
                                        handler: resumeClosure)
         pauseController.addAction(endGame)
@@ -82,12 +79,14 @@ class GameViewController: UIViewController {
     var gameData = GameData()
 
     var addRowTimer: Timer?
-    var addRowTimerInterval = 1.2
+    var addRowTimerInterval = 0.1//1.2
     let addRowCountLimit = 4
     var addRowCount = 1
 
     var expertModeOn = false
     var trainingModeOn = false
+    var gameIsOver = false
+
     var orientationConstraints = ViewConstraints()
 
     var menuIsShowing = false {
@@ -98,10 +97,10 @@ class GameViewController: UIViewController {
 
     lazy var timerView = TimerView()
     lazy var menuButton = MenuButton(gameController: self,
-                                     action: #selector(self.handleMenuButton))
+                                     action: #selector(handleMenuButton))
 
     lazy var gameOverView: GameOverView = {
-        let gameOverView = GameOverView()
+        let gameOverView = GameOverView(playAgainAction: handlePlayAgainButton)
         gameOverView.alpha = 0
         view.addNoMaskSubviews([gameOverView])
         gameOverView.setUpConstraints(anchorView: gridView)
@@ -197,6 +196,15 @@ class GameViewController: UIViewController {
 
         coordinator.animate(alongsideTransition: nil) { _ in
             self.viewsToHideOnRotation.forEach { $0.isHidden = false }
+        }
+    }
+
+    @objc func handlePlayAgainButton() {
+        gameIsOver = false
+        gameOverView.hide {
+            self.timerView.update(count: 0)
+            self.gridView.showBackground()
+            self.startGame()
         }
     }
 
@@ -299,6 +307,7 @@ class GameViewController: UIViewController {
     }
 
     func endGame() {
+        gameIsOver = true
         addRowTimer?.invalidate()
         timerView.updateForGameOver()
         gridView.blockTokenTaps()
