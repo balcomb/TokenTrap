@@ -318,7 +318,6 @@ class GameViewController: UIViewController {
     }
 
     func tokenTapped(tokenID: TokenID) {
-        print("tokenTapped " + String(tokenID))
         guard let result = gameData.processTokenTap(tokenID: tokenID) else {
             // TODO: end game?
             return

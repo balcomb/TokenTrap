@@ -19,6 +19,32 @@ class TokenData: Equatable {
     init(attributes: TokenAttributes) {
         self.attributes = attributes
     }
+
+    static func random() -> TokenData {
+        TokenData(attributes: (TokenColor.random(), TokenIcon.random()))
+    }
+
+    static func randomKeySequence(attributes: TokenAttributes) -> [TokenData] {
+        let pair = Self.randomKeyPair(attributes: attributes)
+        return [pair.0, pair.1]
+    }
+
+    static func randomKeyPair(attributes: TokenAttributes) -> (TokenData, TokenData) {
+        let pairAttributes: (TokenAttributes, TokenAttributes)
+
+        if arc4random_uniform(2) == 0 {
+            let colors = TokenColor.colorSet().subtracting([attributes.color]).shuffled()
+            pairAttributes = ((colors[0], attributes.icon),
+                              (colors[1], attributes.icon))
+        } else {
+            let icons = TokenIcon.iconSet().subtracting([attributes.icon]).shuffled()
+            pairAttributes = ((attributes.color, icons[0]),
+                              (attributes.color, icons[1]))
+        }
+
+        return (TokenData(attributes: pairAttributes.0),
+                TokenData(attributes: pairAttributes.1))
+    }
 }
 
 typealias TokenID = Int
@@ -46,18 +72,34 @@ class GameData {
     }
 
     func nextRow() -> [TokenData] {
-        var rowData = [TokenData]()
-
-        for _ in 0 ..< GridView.size {
-            let tData = TokenData(attributes: (TokenColor.random(), TokenIcon.random()))
-            tData.id = tokenIDCounter.incremented()
-            rowData.append(tData)
-            tDataMap[tData.id] = tData
-        }
-
+        let rowData = buildRowData()
         rows.append(rowData)
+        updateMap(rowData)
 
         return rowData
+    }
+
+    func buildRowData() -> [TokenData] {
+        var rowData = [TokenData]()
+        var keySequence = TokenData.randomKeySequence(attributes: targetAttributes)
+        let keyStartIndexUpperBound = GridView.size - keySequence.count + 1
+        let keyStartIndex = arc4random_uniform(UInt32(keyStartIndexUpperBound))
+
+        for index in 0 ..< GridView.size {
+            let tData = index >= keyStartIndex && !keySequence.isEmpty
+                ? keySequence.removeFirst()
+                : TokenData.random()
+            rowData.append(tData)
+        }
+
+        return rowData
+    }
+
+    func updateMap(_ row: [TokenData]) {
+        row.forEach { tData in
+            tData.id = tokenIDCounter.incremented()
+            tDataMap[tData.id] = tData
+        }
     }
 
     func rowIndexForID(_ tokenID: TokenID) -> Int? {
