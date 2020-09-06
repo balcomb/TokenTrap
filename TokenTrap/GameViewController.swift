@@ -79,7 +79,7 @@ class GameViewController: UIViewController {
     var gameData = GameData()
 
     var addRowTimer: Timer?
-    var addRowTimerInterval = 0.1//1.2
+    var addRowTimerInterval = 1.2
     let addRowCountLimit = 4
     var addRowCount = 1
 
