@@ -95,6 +95,8 @@ class GameViewController: UIViewController {
         }
     }
 
+    lazy var levelView = GameInfoView(type: .level, value: 1)
+    lazy var scoreView = GameInfoView(type: .score, value: 0)
     lazy var timerView = TimerView()
     lazy var levelProgressView = LevelProgressView()
     lazy var menuButton = MenuButton(gameController: self,
@@ -169,7 +171,9 @@ class GameViewController: UIViewController {
                                 levelIntroView,
                                 targetTokenView,
                                 menuButton,
-                                levelProgressView])
+                                levelProgressView,
+                                levelView,
+                                scoreView])
         setUpConstraints()
     }
 
@@ -360,6 +364,8 @@ class GameViewController: UIViewController {
         setUpTargetConstraints()
         levelIntroView.setUpConstraints(gridView)
         menuButton.setUpConstraints(gameController: self)
+        setUpInfoConstraints()
+        orientationConstraints.merge(scoreView.orientationConstraints)
     }
 
     func setUpTargetConstraints() {
@@ -429,5 +435,25 @@ class GameViewController: UIViewController {
                                                                                                    constant: levelProgressView.weight),
                                                             levelProgressView.bottomAnchor.constraint(equalTo: levelProgressView.topAnchor,
                                                                                                       constant: levelProgressView.weight)])
+    }
+
+    func setUpInfoConstraints() {
+        let padding = CGFloat(18)
+        orientationConstraints.addForOrientation(landscape: [levelView.leftAnchor.constraint(equalTo: levelProgressView.rightAnchor,
+                                                                                             constant: padding),
+                                                             levelView.bottomAnchor.constraint(equalTo: gridView.bottomAnchor,
+                                                                                               constant: -padding),
+                                                             scoreView.leftAnchor.constraint(equalTo: levelProgressView.rightAnchor,
+                                                                                             constant: padding),
+                                                             scoreView.topAnchor.constraint(equalTo: gridView.topAnchor,
+                                                                                            constant: padding)],
+                                                 portrait: [levelView.topAnchor.constraint(equalTo: levelProgressView.bottomAnchor,
+                                                                                           constant: padding),
+                                                            levelView.leftAnchor.constraint(equalTo: gridView.leftAnchor,
+                                                                                            constant: padding),
+                                                            scoreView.topAnchor.constraint(equalTo: levelProgressView.bottomAnchor,
+                                                                                           constant: padding),
+                                                            scoreView.rightAnchor.constraint(equalTo: gridView.rightAnchor,
+                                                                                             constant: -padding)])
     }
 }
