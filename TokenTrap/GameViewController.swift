@@ -12,7 +12,7 @@ enum TokenTapResult {
     case firstSelection(tokenID: TokenID)
     case partialMatch(tDataPair: TokenDataPair)
     case mismatch(tDataPair: TokenDataPair)
-    case targetMatch(tDataPair: TokenDataPair)
+    case targetMatch(tDataPair: TokenDataPair, rowsCleared: Int)
 }
 
 class MenuButton: UIButton {
@@ -96,6 +96,7 @@ class GameViewController: UIViewController {
     }
 
     lazy var timerView = TimerView()
+    lazy var levelProgressView = LevelProgressView()
     lazy var menuButton = MenuButton(gameController: self,
                                      action: #selector(handleMenuButton))
 
@@ -155,7 +156,8 @@ class GameViewController: UIViewController {
 
     var viewsToHideOnRotation: [UIView] {
         [timerView,
-         targetTokenView]
+         targetTokenView,
+         levelProgressView]
     }
 
     override func viewDidLoad() {
@@ -166,7 +168,8 @@ class GameViewController: UIViewController {
                                 timerView,
                                 levelIntroView,
                                 targetTokenView,
-                                menuButton])
+                                menuButton,
+                                levelProgressView])
         setUpConstraints()
     }
 
@@ -310,9 +313,10 @@ class GameViewController: UIViewController {
         gameIsOver = true
         addRowTimer?.invalidate()
         timerView.updateForGameOver()
+        levelProgressView.update(count: 0)
         gridView.blockTokenTaps()
         gridView.clearGrid()
-        gameData.rows.removeAll()
+        gameData.reset()
         gameOverView.renderStats(score: gameData.score,
                                  level: expertModeOn ? .expert : .basic)
     }
@@ -321,6 +325,10 @@ class GameViewController: UIViewController {
         guard let result = gameData.processTokenTap(tokenID: tokenID) else {
             // TODO: end game?
             return
+        }
+
+        if case TokenTapResult.targetMatch(_, let rowsCleared) = result {
+            levelProgressView.update(count: rowsCleared)
         }
 
         gridView.processTokenTapResult(result)
@@ -345,7 +353,9 @@ class GameViewController: UIViewController {
     func setUpConstraints() {
         setUpGridConstraints()
         setUpTimerConstraints()
+        setUpLevelProgressConstraints()
         orientationConstraints.merge(timerView.indicatorConstraints)
+        orientationConstraints.merge(levelProgressView.indicatorConstraints)
         setUpIntroConstraints()
         setUpTargetConstraints()
         levelIntroView.setUpConstraints(gridView)
@@ -405,4 +415,19 @@ class GameViewController: UIViewController {
                                                                                               constant: -timerView.weight)])
     }
 
+    func setUpLevelProgressConstraints() {
+        orientationConstraints.addForOrientation(landscape: [levelProgressView.leftAnchor.constraint(equalTo: gridView.rightAnchor,
+                                                                                                     constant: levelProgressView.weight),
+                                                             levelProgressView.rightAnchor.constraint(equalTo: levelProgressView.leftAnchor,
+                                                                                                      constant: levelProgressView.weight),
+                                                             levelProgressView.topAnchor.constraint(equalTo: gridView.topAnchor),
+                                                             levelProgressView.bottomAnchor.constraint(equalTo: gridView.bottomAnchor)],
+
+                                                 portrait: [levelProgressView.leftAnchor.constraint(equalTo: gridView.leftAnchor),
+                                                            levelProgressView.rightAnchor.constraint(equalTo: gridView.rightAnchor),
+                                                            levelProgressView.topAnchor.constraint(equalTo: gridView.bottomAnchor,
+                                                                                                   constant: levelProgressView.weight),
+                                                            levelProgressView.bottomAnchor.constraint(equalTo: levelProgressView.topAnchor,
+                                                                                                      constant: levelProgressView.weight)])
+    }
 }

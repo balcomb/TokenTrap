@@ -61,6 +61,7 @@ extension TokenID {
 class GameData {
     var level = 0
     var score = 0
+    var rowsCleared = 0
     var tokenIDCounter = TokenID.counterStart
     var rows = [[TokenData]]()
     var selectedToken: TokenData?
@@ -69,6 +70,11 @@ class GameData {
 
     var canAddRow: Bool {
         rows.count < GridView.size
+    }
+
+    func reset() {
+        rows.removeAll()
+        rowsCleared = 0
     }
 
     func nextRow() -> [TokenData] {
@@ -157,7 +163,9 @@ class GameData {
         case .adjacentInRow:
             if tDataPair.tData1.attributes == targetAttributes {
                 removeRowForMatch(tokenID: tDataPair.tData1.id)
-                return .targetMatch(tDataPair: tDataPair)
+                rowsCleared += 1
+                return .targetMatch(tDataPair: tDataPair,
+                                    rowsCleared: rowsCleared)
             } else {
                 return .partialMatch(tDataPair: tDataPair)
             }

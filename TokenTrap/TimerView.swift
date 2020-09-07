@@ -8,17 +8,21 @@
 
 import UIKit
 
-class TimerView: UIView {
+class IndicatorView: UIView {
 
     let weight = CGFloat(4)
-    let indicatorCount = 4
+
+    // override in subclasses
+    var indicatorCount: Int { 0 }
+    var onColor: UIColor { .clear }
+    var offColor: UIColor { .clear }
 
     lazy var indicators: [UIView] = {
         var indicators = [UIView]()
 
         for index in 0 ..< indicatorCount {
             let indicator = UIView()
-            indicator.backgroundColor = .darkGreen
+            indicator.backgroundColor = offColor
             indicator.layer.cornerRadius = weight / 2.0
             indicators.append(indicator)
         }
@@ -68,11 +72,24 @@ class TimerView: UIView {
 
     func update(count: Int) {
         for (index, indicator) in indicators.enumerated() {
-            indicator.backgroundColor = index < count ? .green : .darkGreen
+            indicator.backgroundColor = index < count ? onColor : offColor
         }
     }
+}
+
+class TimerView: IndicatorView {
+
+    override var indicatorCount: Int { 4 }
+    override var onColor: UIColor { .green }
+    override var offColor: UIColor { .darkGreen }
 
     func updateForGameOver() {
         indicators.forEach { $0.backgroundColor = .red }
     }
+}
+
+class LevelProgressView: IndicatorView {
+    override var indicatorCount: Int { 10 }
+    override var onColor: UIColor { .targetYellow }
+    override var offColor: UIColor { .levelProgressOff }
 }

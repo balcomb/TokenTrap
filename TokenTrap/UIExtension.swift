@@ -128,6 +128,9 @@ extension UIColor {
     open class var targetYellow: UIColor {
         UIColor(named: "targetYellow")!
     }
+    open class var levelProgressOff: UIColor {
+        UIColor(named: "levelProgressOff")!
+    }
     open class var selectedGreen: UIColor {
         UIColor(red: 0.7, green: 1, blue: 0.7, alpha: 1)
     }
