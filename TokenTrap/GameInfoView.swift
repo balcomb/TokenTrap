@@ -18,6 +18,12 @@ class GameInfoView: UIView {
     var type: GameInfoType = .level
     var orientationConstraints = ViewConstraints()
 
+    var value = 0 {
+        didSet {
+            valueLabel.text = String(value)
+        }
+    }
+
     lazy var typeLabel: UILabel = {
         let label = UILabel()
         label.font = .boldSystemFont(ofSize: 12)

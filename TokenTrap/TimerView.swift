@@ -75,11 +75,30 @@ class IndicatorView: UIView {
             indicator.backgroundColor = index < count ? onColor : offColor
         }
     }
+
+    func flash(index: Int = 0, completion: @escaping () -> Void) {
+        let animation = {
+            self.indicators.forEach {
+                $0.alpha = CGFloat(index % 2)
+            }
+        }
+
+        UIView.animate(withDuration: 0.2,
+                       animations: animation) { _ in
+
+            guard index < 7 else {
+                completion()
+                return
+            }
+
+            self.flash(index: index + 1, completion: completion)
+        }
+    }
 }
 
 class TimerView: IndicatorView {
 
-    override var indicatorCount: Int { 4 }
+    override var indicatorCount: Int { Constants.addRowCountLimit }
     override var onColor: UIColor { .green }
     override var offColor: UIColor { .darkGreen }
 
@@ -89,7 +108,7 @@ class TimerView: IndicatorView {
 }
 
 class LevelProgressView: IndicatorView {
-    override var indicatorCount: Int { 10 }
+    override var indicatorCount: Int { Constants.levelRowTarget }
     override var onColor: UIColor { .targetYellow }
     override var offColor: UIColor { .levelProgressOff }
 }

@@ -51,7 +51,7 @@ class GridRow: Equatable {
     }
 
     init?(rowData: [TokenData], view: GridView) {
-        guard rowData.count == GridView.size else {
+        guard rowData.count == Constants.gridSize else {
             return nil
         }
 
@@ -122,7 +122,6 @@ extension TokenViewMap {
 
 class GridView: UIView {
 
-    static let size = 8
     static let padding = CGFloat(2)
 
     weak var controller: GameViewController?
@@ -145,7 +144,7 @@ class GridView: UIView {
     lazy var backgroundViews: [UIView] = {
         var views = [UIView]()
 
-        for index in 0 ..< GridView.size * GridView.size {
+        for index in 0 ..< Constants.gridSize * Constants.gridSize {
             let view = UIView()
             view.backgroundColor = UIColor.black.withAlphaComponent(0.15)
             views.append(view)
@@ -177,9 +176,9 @@ class GridView: UIView {
 
         for (index, view) in backgroundViews.enumerated() {
             // first view in row anchors to superview left, other views anchor to previous view right
-            let anchorForLeft = index % GridView.size == 0 ? leftAnchor : backgroundViews[index - 1].rightAnchor
+            let anchorForLeft = index % Constants.gridSize == 0 ? leftAnchor : backgroundViews[index - 1].rightAnchor
             // first row anchors to superview top, other views anchor to bottom of view above
-            let anchorForTop = index < GridView.size ? topAnchor : backgroundViews[index - GridView.size].bottomAnchor
+            let anchorForTop = index < Constants.gridSize ? topAnchor : backgroundViews[index - Constants.gridSize].bottomAnchor
 
             var constraints = tokenSizeConstraints(view: view)
             constraints.append(contentsOf: [view.leftAnchor.constraint(equalTo: anchorForLeft,
@@ -191,7 +190,7 @@ class GridView: UIView {
     }
 
     func tokenSizeConstraints(view: UIView) -> [NSLayoutConstraint] {
-        let widthMultiplier = 1.0 / CGFloat(GridView.size)
+        let widthMultiplier = 1.0 / CGFloat(Constants.gridSize)
         let widthConstant = -(GridView.padding + (GridView.padding * widthMultiplier))
 
         return [view.widthAnchor.constraint(equalTo: widthAnchor,
@@ -322,7 +321,7 @@ class GridView: UIView {
 
     func updateForTargetMatch(_ tDataPair: TokenDataPair) {
         tViewMap.tokenViewPair(forDataPair: tDataPair)?.update(withData: tDataPair.tData1,
-                                                              highlight: .targetMatch) {
+                                                               highlight: .targetMatch) {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(300)) {
                 self.removeRow(tokenID: tDataPair.tData1.id)
             }

@@ -59,6 +59,7 @@ extension TokenID {
 }
 
 class GameData {
+
     var level = 0
     var score = 0
     var rowsCleared = 0
@@ -69,10 +70,16 @@ class GameData {
     var tDataMap = [TokenID: TokenData]()
 
     var canAddRow: Bool {
-        rows.count < GridView.size
+        rows.count < Constants.gridSize
+    }
+
+    func levelUp() {
+        level += 1
+        reset()
     }
 
     func reset() {
+        tDataMap.removeAll()
         rows.removeAll()
         rowsCleared = 0
     }
@@ -88,10 +95,10 @@ class GameData {
     func buildRowData() -> [TokenData] {
         var rowData = [TokenData]()
         var keySequence = TokenData.randomKeySequence(attributes: targetAttributes)
-        let keyStartIndexUpperBound = GridView.size - keySequence.count + 1
+        let keyStartIndexUpperBound = Constants.gridSize - keySequence.count + 1
         let keyStartIndex = arc4random_uniform(UInt32(keyStartIndexUpperBound))
 
-        for index in 0 ..< GridView.size {
+        for index in 0 ..< Constants.gridSize {
             let tData = index >= keyStartIndex && !keySequence.isEmpty
                 ? keySequence.removeFirst()
                 : TokenData.random()

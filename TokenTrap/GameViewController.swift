@@ -74,13 +74,39 @@ extension UIAlertController {
     }
 }
 
+enum Constants {
+    static let levelRowTarget = 10
+    static let addRowCountLimit = 4
+    static let gridSize = 8
+}
+
+class LevelCompleteLabel: UILabel {
+
+    override func willMove(toSuperview newSuperview: UIView?) {
+        font = .systemFont(ofSize: 24,
+                           weight: .heavy)
+        numberOfLines = 0
+        textAlignment = .center
+        textColor = .white
+    }
+
+    func setUpConstraints(gridView: GridView) {
+        NSLayoutConstraint.activate([centerXAnchor.constraint(equalTo: gridView.centerXAnchor),
+                                     centerYAnchor.constraint(equalTo: gridView.centerYAnchor)])
+    }
+
+    func show(level: Int) {
+        text = "Level " + String(level) + "\nComplete!"
+        isHidden = false
+    }
+}
+
 class GameViewController: UIViewController {
 
     var gameData = GameData()
 
     var addRowTimer: Timer?
     var addRowTimerInterval = 1.2
-    let addRowCountLimit = 4
     var addRowCount = 1
 
     var expertModeOn = false
@@ -156,6 +182,12 @@ class GameViewController: UIViewController {
         return view
     }()
 
+    lazy var levelCompleteLabel: LevelCompleteLabel = {
+        let label = LevelCompleteLabel()
+        label.isHidden = true
+        return label
+    }()
+
     var viewsToHideOnRotation: [UIView] {
         [timerView,
          targetTokenView,
@@ -173,7 +205,8 @@ class GameViewController: UIViewController {
                                 menuButton,
                                 levelProgressView,
                                 levelView,
-                                scoreView])
+                                scoreView,
+                                levelCompleteLabel])
         setUpConstraints()
     }
 
@@ -208,14 +241,12 @@ class GameViewController: UIViewController {
 
     @objc func handlePlayAgainButton() {
         gameIsOver = false
-        gameOverView.hide {
-            self.timerView.update(count: 0)
-            self.gridView.showBackground()
-            self.startGame()
-        }
+        gameOverView.hide(completion: startGame)
     }
 
     func startGame() {
+        gameData.level = 0
+        timerView.update(count: 0)
         startLevel()
     }
 
@@ -225,14 +256,21 @@ class GameViewController: UIViewController {
         targetTokenView.icon = gameData.targetAttributes.icon
     }
 
-    func startLevel() {
-        gameData.level += 1
+    func newLevelUIRefresh() {
+        levelCompleteLabel.isHidden = true
+        levelProgressView.update(count: 0)
+        gridView.showBackground()
+        levelView.value = gameData.level
         updateTargetToken()
+    }
+
+    func startLevel() {
+        gameData.levelUp()
+        newLevelUIRefresh()
         showLevelIntro()
 
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(5)) {
-            self.finishLevelStart()
-        }
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(5),
+                                      execute: finishLevelStart)
     }
 
     @objc func finishLevelStart() {
@@ -240,10 +278,13 @@ class GameViewController: UIViewController {
             return
         }
 
-        self.hideLevelIntro {
-            self.addRow()
-            self.startAddRowTimer()
-        }
+        hideLevelIntro(completion: startAddingRows)
+    }
+
+    func startAddingRows() {
+        addRowCount = 1
+        addRow()
+        startAddRowTimer()
     }
 
     func showLevelIntro() {
@@ -300,7 +341,7 @@ class GameViewController: UIViewController {
 
         timerView.update(count: addRowCount)
 
-        if addRowCount == addRowCountLimit {
+        if addRowCount == Constants.addRowCountLimit {
             guard gameData.canAddRow else {
                 endGame()
                 return
@@ -333,9 +374,44 @@ class GameViewController: UIViewController {
 
         if case TokenTapResult.targetMatch(_, let rowsCleared) = result {
             levelProgressView.update(count: rowsCleared)
+
+            if gameData.rows.isEmpty {
+                resetRowAdding()
+            }
+
+            if rowsCleared == Constants.levelRowTarget {
+                endLevel()
+            }
         }
 
         gridView.processTokenTapResult(result)
+    }
+
+    func resetRowAdding() {
+        addRowTimer?.invalidate()
+        timerView.update(count: 0)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1),
+                                      execute: startAddingRows)
+    }
+
+    func endLevel() {
+        addRowTimer?.invalidate()
+        timerView.update(count: 0)
+        gridView.blockTokenTaps()
+        levelProgressView.update(count: 10)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1),
+                                      execute: flashLevelProgress)
+    }
+
+    func flashLevelProgress() {
+        levelProgressView.flash(completion: startLevelTransition)
+    }
+
+    func startLevelTransition() {
+        gridView.clearGrid()
+        levelCompleteLabel.show(level: gameData.level)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(3),
+                                      execute: startLevel)
     }
 
     @objc func handleMenuButton() {
@@ -366,6 +442,7 @@ class GameViewController: UIViewController {
         menuButton.setUpConstraints(gameController: self)
         setUpInfoConstraints()
         orientationConstraints.merge(scoreView.orientationConstraints)
+        levelCompleteLabel.setUpConstraints(gridView: gridView)
     }
 
     func setUpTargetConstraints() {
