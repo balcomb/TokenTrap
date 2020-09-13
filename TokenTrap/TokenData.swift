@@ -75,13 +75,19 @@ class GameData {
 
     func levelUp() {
         level += 1
-        reset()
+        resetLevel()
     }
 
-    func reset() {
+    func resetLevel() {
         tDataMap.removeAll()
         rows.removeAll()
         rowsCleared = 0
+    }
+
+    func reset() {
+        resetLevel()
+        level = 0
+        score = 0
     }
 
     func nextRow() -> [TokenData] {
@@ -172,7 +178,8 @@ class GameData {
                 removeRowForMatch(tokenID: tDataPair.tData1.id)
                 rowsCleared += 1
                 return .targetMatch(tDataPair: tDataPair,
-                                    rowsCleared: rowsCleared)
+                                    rowsCleared: rowsCleared,
+                                    matchValue: Constants.baseRowValue)
             } else {
                 return .partialMatch(tDataPair: tDataPair)
             }

@@ -296,7 +296,7 @@ class GridView: UIView {
             updateForMismatch(tDataPair)
         case .partialMatch(let tDataPair):
             updateForPartialMatch(tDataPair)
-        case .targetMatch(let tDataPair, _):
+        case .targetMatch(let tDataPair, _, _):
             updateForTargetMatch(tDataPair)
         }
     }

@@ -12,7 +12,9 @@ enum TokenTapResult {
     case firstSelection(tokenID: TokenID)
     case partialMatch(tDataPair: TokenDataPair)
     case mismatch(tDataPair: TokenDataPair)
-    case targetMatch(tDataPair: TokenDataPair, rowsCleared: Int)
+    case targetMatch(tDataPair: TokenDataPair,
+                     rowsCleared: Int,
+                     matchValue: Int)
 }
 
 class MenuButton: UIButton {
@@ -78,6 +80,7 @@ enum Constants {
     static let levelRowTarget = 10
     static let addRowCountLimit = 4
     static let gridSize = 8
+    static let baseRowValue = 5
 }
 
 class LevelCompleteLabel: UILabel {
@@ -245,7 +248,8 @@ class GameViewController: UIViewController {
     }
 
     func startGame() {
-        gameData.level = 0
+        gameData.reset()
+        scoreView.value = 0
         timerView.update(count: 0)
         startLevel()
     }
@@ -361,7 +365,6 @@ class GameViewController: UIViewController {
         levelProgressView.update(count: 0)
         gridView.blockTokenTaps()
         gridView.clearGrid()
-        gameData.reset()
         gameOverView.renderStats(score: gameData.score,
                                  level: expertModeOn ? .expert : .basic)
     }
@@ -372,19 +375,25 @@ class GameViewController: UIViewController {
             return
         }
 
-        if case TokenTapResult.targetMatch(_, let rowsCleared) = result {
-            levelProgressView.update(count: rowsCleared)
+        checkForTargetMatch(result)
+        gridView.processTokenTapResult(result)
+    }
 
-            if gameData.rows.isEmpty {
-                resetRowAdding()
-            }
-
-            if rowsCleared == Constants.levelRowTarget {
-                endLevel()
-            }
+    func checkForTargetMatch(_ result: TokenTapResult) {
+        guard case TokenTapResult.targetMatch(_, let rowsCleared, let matchValue) = result else {
+            return
         }
 
-        gridView.processTokenTapResult(result)
+        levelProgressView.update(count: rowsCleared)
+
+        gameData.score += matchValue
+        scoreView.value = gameData.score
+
+        if rowsCleared == Constants.levelRowTarget {
+            endLevel()
+        } else if gameData.rows.isEmpty {
+            resetRowAdding()
+        }
     }
 
     func resetRowAdding() {

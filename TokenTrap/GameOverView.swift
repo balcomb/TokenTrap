@@ -10,15 +10,19 @@ import UIKit
 
 class GameOverView: UIView {
 
+    static var smallFont: UIFont { .boldSystemFont(ofSize: 16) }
+
     lazy var gameOverLabel: UILabel = {
         let label = UILabel()
         label.textColor = .gold
-        label.font = .boldSystemFont(ofSize: 22)
+        label.font = .systemFont(ofSize: 24,
+                                 weight: .heavy)
         return label
     }()
 
     lazy var finalScoreLabel: UILabel = {
         let label = UILabel()
+        label.font = GameOverView.smallFont
         label.text = "Final Score"
         label.textColor = .logoBlue
         return label
@@ -60,7 +64,8 @@ class GameOverView: UIView {
 
     func genericAverageLabel() -> UILabel {
         let label = UILabel()
-        label.textColor = UIColor(white: 0.9,
+        label.font = GameOverView.smallFont
+        label.textColor = UIColor(white: 0.95,
                                   alpha: 1)
         return label
     }
