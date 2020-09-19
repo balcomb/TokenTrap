@@ -8,6 +8,10 @@
 
 import Foundation
 
+var fiftyFifty: Bool {
+    [true, false].randomElement()!
+}
+
 class TokenData: Equatable {
     static func == (lhs: TokenData, rhs: TokenData) -> Bool {
         lhs === rhs
@@ -15,6 +19,9 @@ class TokenData: Equatable {
 
     var attributes: TokenAttributes
     var id = TokenID.notSet
+    var isWildcard = false
+    var isWildcardRow = false
+    var isUniformRow = false
 
     init(attributes: TokenAttributes) {
         self.attributes = attributes
@@ -32,7 +39,7 @@ class TokenData: Equatable {
     static func randomKeyPair(attributes: TokenAttributes) -> (TokenData, TokenData) {
         let pairAttributes: (TokenAttributes, TokenAttributes)
 
-        if arc4random_uniform(2) == 0 {
+        if fiftyFifty {
             let colors = TokenColor.colorSet().subtracting([attributes.color]).shuffled()
             pairAttributes = ((colors[0], attributes.icon),
                               (colors[1], attributes.icon))
@@ -47,6 +54,52 @@ class TokenData: Equatable {
     }
 }
 
+typealias TokenDataRow = [TokenData]
+extension TokenDataRow {
+
+    var isChallengeRow: Bool {
+        guard let firstTData = first else { return false }
+        return firstTData.isWildcardRow || firstTData.isUniformRow
+    }
+
+    func setAllWildcards() {
+        forEach { $0.isWildcard = true }
+        first?.isWildcardRow = true
+    }
+
+    func addRandomWildcard() {
+        self.randomElement()?.isWildcard = true
+    }
+
+    static func standardRow(targetAttributes: TokenAttributes) -> TokenDataRow {
+        var row = TokenDataRow()
+        var keySequence = TokenData.randomKeySequence(attributes: targetAttributes)
+        let keyStartIndexUpperBound = Constants.gridSize - keySequence.count + 1
+        let keyStartIndex = arc4random_uniform(UInt32(keyStartIndexUpperBound))
+
+        for index in 0 ..< Constants.gridSize {
+            let tData = index >= keyStartIndex && !keySequence.isEmpty
+                ? keySequence.removeFirst()
+                : TokenData.random()
+            row.append(tData)
+        }
+
+        return row
+    }
+
+    static func uniformRow() -> TokenDataRow {
+        let firstTData = TokenData.random()
+        firstTData.isUniformRow = true
+        var row = [firstTData]
+
+        while row.count < Constants.gridSize {
+            row.append(TokenData(attributes: firstTData.attributes))
+        }
+
+        return row
+    }
+}
+
 typealias TokenID = Int
 extension TokenID {
     static var notSet = -1
@@ -58,9 +111,60 @@ extension TokenID {
     }
 }
 
+class ChallengeLogic {
+    /**
+     * challenge progression:
+     * 1: uniform rows
+     * 2: one wildcard per row (+ uniform for expert mode)
+     * 3: wildcard rows (+ uniform & one wildcard per row for expert mode)
+     * rest of game: both challenge rows plus one wildcard per row
+     */
+
+    unowned var gameData: GameData
+
+    init(gameData: GameData) {
+        self.gameData = gameData
+    }
+
+    var expertModeOn: Bool { gameData.expertModeOn }
+    var level: Int { gameData.level }
+    var rows: [TokenDataRow] { gameData.rows }
+
+    var challengeStartLevel: Int {
+        expertModeOn ? 2 : 5
+    }
+
+    var wildcardRowStartLevel: Int {
+        challengeStartLevel + 2
+    }
+
+    var isUniformRowChallengeLevel: Bool {
+        expertModeOn
+            ? level >= challengeStartLevel
+            : level == challengeStartLevel || level > wildcardRowStartLevel
+    }
+
+    var isWildcardRowChallengeLevel: Bool {
+        level >= wildcardRowStartLevel
+    }
+
+    var isRandomWildcardChallengeLevel: Bool {
+        expertModeOn
+            ? level > challengeStartLevel
+            : level == challengeStartLevel + 1 || level > wildcardRowStartLevel + 1
+    }
+
+    var canAddChallengeRow: Bool {
+        rows.count > 2
+            && rows.allSatisfy({ $0.isChallengeRow == false })
+            && fiftyFifty
+    }
+}
+
 class GameData {
 
     var level = 0
+    var expertModeOn = false
     var score = 0
     var rowsCleared = 0
     var tokenIDCounter = TokenID.counterStart
@@ -68,6 +172,8 @@ class GameData {
     var selectedToken: TokenData?
     var targetAttributes: TokenAttributes = (TokenColor.notSet, TokenIcon.notSet)
     var tDataMap = [TokenID: TokenData]()
+
+    lazy var challengeLogic = ChallengeLogic(gameData: self)
 
     var canAddRow: Bool {
         rows.count < Constants.gridSize
@@ -99,19 +205,31 @@ class GameData {
     }
 
     func buildRowData() -> [TokenData] {
-        var rowData = [TokenData]()
-        var keySequence = TokenData.randomKeySequence(attributes: targetAttributes)
-        let keyStartIndexUpperBound = Constants.gridSize - keySequence.count + 1
-        let keyStartIndex = arc4random_uniform(UInt32(keyStartIndexUpperBound))
-
-        for index in 0 ..< Constants.gridSize {
-            let tData = index >= keyStartIndex && !keySequence.isEmpty
-                ? keySequence.removeFirst()
-                : TokenData.random()
-            rowData.append(tData)
+        if let uniformRow = buildUniformRow() {
+            return uniformRow
         }
 
-        return rowData
+        let row = TokenDataRow.standardRow(targetAttributes: targetAttributes)
+        addWildcards(row)
+        return row
+    }
+
+    func buildUniformRow() -> [TokenData]? {
+        guard challengeLogic.isUniformRowChallengeLevel
+            && challengeLogic.canAddChallengeRow else {
+            return nil
+        }
+
+        return TokenDataRow.uniformRow()
+    }
+
+    func addWildcards(_ row: [TokenData]) {
+        if challengeLogic.isWildcardRowChallengeLevel
+            && challengeLogic.canAddChallengeRow {
+            row.setAllWildcards()
+        } else if challengeLogic.isRandomWildcardChallengeLevel {
+            row.addRandomWildcard()
+        }
     }
 
     func updateMap(_ row: [TokenData]) {

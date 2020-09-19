@@ -60,6 +60,7 @@ class GridRow: Equatable {
         for tData in rowData {
             let tView = TokenView(tData.attributes)
             tView.id = tData.id
+            tView.isWildcard = tData.isWildcard
             let tapGesture = UITapGestureRecognizer(target: view,
                                                     action: #selector(GridView.handleTokenTap(tap:)))
             tView.addGestureRecognizer(tapGesture)

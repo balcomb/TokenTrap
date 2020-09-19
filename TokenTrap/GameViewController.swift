@@ -200,6 +200,7 @@ class GameViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
 
+        gameData.expertModeOn = expertModeOn
         view.backgroundColor = .background
         view.addNoMaskSubviews([gridView,
                                 timerView,

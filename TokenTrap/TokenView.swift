@@ -93,6 +93,20 @@ class TokenView: UIView {
     lazy var iconBaseSizeConstraints = iconSizeConstraints()
     lazy var iconBigSizeConstraints = iconSizeConstraints(multiplier: 0.8)
 
+    var isWildcard = false {
+        didSet {
+            iconView.isHidden = isWildcard
+            wildcardIcon.isHidden = !isWildcard
+        }
+    }
+    lazy var wildcardIcon: UILabel = {
+        let wildcard = UILabel()
+        wildcard.text = "?"
+        wildcard.textColor = .wildcardPurple
+        wildcard.isHidden = true
+        return wildcard
+    }()
+
     convenience init(_ attributes: TokenAttributes) {
         self.init()
         backgroundColor = .white
@@ -105,12 +119,15 @@ class TokenView: UIView {
     override func layoutSubviews() {
         super.layoutSubviews()
         layer.cornerRadius = frame.size.height / 2
+        wildcardIcon.font = UIFont(name: "AmericanTypewriter-Bold",
+                                   size: frame.size.height * 0.8)
 
         guard subviews.count == 0 else {
             return
         }
 
-        addNoMaskSubviews([iconView])
+        addNoMaskSubviews([iconView,
+                           wildcardIcon])
         setUpConstraints()
     }
 
@@ -134,12 +151,15 @@ class TokenView: UIView {
 
     func setUpConstraints() {
         var constraints = iconBaseSizeConstraints
-        constraints.append(contentsOf: [iconView.centerXAnchor.constraint(equalTo: centerXAnchor),
-                                        iconView.centerYAnchor.constraint(equalTo: centerYAnchor)])
-        constraints.forEach { $0.isActive = true }
+        [iconView, wildcardIcon].forEach {
+            constraints.append(contentsOf: [$0.centerXAnchor.constraint(equalTo: centerXAnchor),
+                                            $0.centerYAnchor.constraint(equalTo: centerYAnchor)])
+        }
+        NSLayoutConstraint.activate(constraints)
     }
 
     func animateIconChange(completion: (() -> Void)? = nil) {
+        isWildcard = false
         iconBaseSizeConstraints.forEach { $0.isActive = false }
         iconBigSizeConstraints.forEach { $0.isActive = true }
 
