@@ -22,6 +22,7 @@ class TokenData: Equatable {
     var isWildcard = false
     var isWildcardRow = false
     var isUniformRow = false
+    var isTrainingHelper = false
 
     init(attributes: TokenAttributes) {
         self.attributes = attributes
@@ -71,11 +72,26 @@ extension TokenDataRow {
         self.randomElement()?.isWildcard = true
     }
 
-    static func standardRow(targetAttributes: TokenAttributes) -> TokenDataRow {
+    func trainingHelperID() -> TokenID? {
+        for tData in self {
+            if tData.isTrainingHelper {
+                return tData.id
+            }
+        }
+
+        return nil
+    }
+
+    static func standardRow(targetAttributes: TokenAttributes,
+                            trainingModeOn: Bool) -> TokenDataRow {
         var row = TokenDataRow()
         var keySequence = TokenData.randomKeySequence(attributes: targetAttributes)
         let keyStartIndexUpperBound = Constants.gridSize - keySequence.count + 1
         let keyStartIndex = arc4random_uniform(UInt32(keyStartIndexUpperBound))
+
+        if trainingModeOn {
+            keySequence.randomElement()?.isTrainingHelper = true
+        }
 
         for index in 0 ..< Constants.gridSize {
             let tData = index >= keyStartIndex && !keySequence.isEmpty
@@ -165,6 +181,7 @@ class GameData {
 
     var level = 0
     var expertModeOn = false
+    var trainingModeOn = false
     var score = 0
     var rowsCleared = 0
     var tokenIDCounter = TokenID.counterStart
@@ -209,7 +226,8 @@ class GameData {
             return uniformRow
         }
 
-        let row = TokenDataRow.standardRow(targetAttributes: targetAttributes)
+        let row = TokenDataRow.standardRow(targetAttributes: targetAttributes,
+                                           trainingModeOn: trainingModeOn)
         addWildcards(row)
         return row
     }
@@ -340,6 +358,18 @@ class GameData {
 
         return adjacentRows
     }
+
+    func trainingHelperIDs() -> [TokenID] {
+        var tokenIDs = [TokenID]()
+
+        rows.forEach {
+            if let tokenID = $0.trainingHelperID() {
+                tokenIDs.append(tokenID)
+            }
+        }
+
+        return tokenIDs
+    }
 }
 
 enum TokenPairRelation {
@@ -359,6 +389,9 @@ struct TokenDataPair {
 
     func updateAttributesForPartialMatch() {
         guard isPartialMatch else { return }
+
+        tData1.isTrainingHelper = false
+        tData2.isTrainingHelper = false
 
         if tData1.attributes.color == tData2.attributes.color {
             let pairIcons: Set<TokenIcon> = [tData1.attributes.icon,

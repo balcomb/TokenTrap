@@ -391,4 +391,10 @@ class GridView: UIView {
     func updateForMenuState(isShowing: Bool) {
         tViewContainer.isHidden = isShowing
     }
+
+    func activateTrainingHelpers(tokenIDs: [TokenID]) {
+        tokenIDs.forEach {
+            self.tViewMap[$0]?.highlight = .trainingHelper
+        }
+    }
 }

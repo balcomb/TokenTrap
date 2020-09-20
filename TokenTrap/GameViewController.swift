@@ -201,6 +201,7 @@ class GameViewController: UIViewController {
         super.viewDidLoad()
 
         gameData.expertModeOn = expertModeOn
+        gameData.trainingModeOn = trainingModeOn
         view.backgroundColor = .background
         view.addNoMaskSubviews([gridView,
                                 timerView,
@@ -326,6 +327,9 @@ class GameViewController: UIViewController {
     }
 
     func addRow() {
+        if trainingModeOn {
+            gridView.activateTrainingHelpers(tokenIDs: gameData.trainingHelperIDs())
+        }
         gridView.addRow(gameData.nextRow())
     }
 
@@ -367,7 +371,8 @@ class GameViewController: UIViewController {
         gridView.blockTokenTaps()
         gridView.clearGrid()
         gameOverView.renderStats(score: gameData.score,
-                                 level: expertModeOn ? .expert : .basic)
+                                 level: expertModeOn ? .expert : .basic,
+                                 trainingModeOn: trainingModeOn)
     }
 
     func tokenTapped(tokenID: TokenID) {

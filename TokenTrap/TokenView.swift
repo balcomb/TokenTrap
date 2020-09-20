@@ -49,6 +49,7 @@ enum TokenHighlight {
     case mismatch
     case targetMatch
     case normal
+    case trainingHelper
 }
 
 class TokenView: UIView {
@@ -85,6 +86,8 @@ class TokenView: UIView {
                 backgroundColor = .targetYellow
             case .normal:
                 backgroundColor = .white
+            case .trainingHelper:
+                backgroundColor = .trainingOrange
             }
         }
     }

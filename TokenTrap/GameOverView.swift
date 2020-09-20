@@ -108,18 +108,23 @@ class GameOverView: UIView {
                                                                              constant: -playAgainPadding)])
     }
 
-    func renderStats(score: Int, level: SkillLevel) {
+    func renderStats(score: Int,
+                     level: SkillLevel,
+                     trainingModeOn: Bool) {
 
-        if StatData.isPersonalBest(score: score, level: level) {
+        if !trainingModeOn && StatData.isPersonalBest(score: score, level: level) {
             gameOverLabel.text = "New Personal Best!"
         } else {
-            gameOverLabel.text = "Game Over"
+            let trainingText = trainingModeOn ? "Training " : ""
+            gameOverLabel.text = trainingText + "Game Over"
         }
 
         scoreLabel.text = String(score)
+        let averageScore = StatData.updatedPersonalAverage(score: score,
+                                                           level: level,
+                                                           trainingModeOn: trainingModeOn)
         personalAverageLabel.text = averageLabelText(level: level,
-                                                     score: StatData.updatedPersonalAverage(score: score,
-                                                                                            level: level))
+                                                     score: averageScore)
         fade(alpha: 1)
     }
 

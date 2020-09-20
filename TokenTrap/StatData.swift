@@ -52,7 +52,8 @@ struct StatData: Decodable {
     }
 
     static func updatedPersonalAverage(score: Int,
-                                       level: SkillLevel) -> Double {
+                                       level: SkillLevel,
+                                       trainingModeOn: Bool) -> Double {
 
         let userDefaults = UserDefaults.standard
         let averageKey = self.statKey(name: "Average",
@@ -61,6 +62,11 @@ struct StatData: Decodable {
                                     level: level)
 
         let currentAverage = userDefaults.double(forKey: averageKey)
+
+        if trainingModeOn {
+            return currentAverage
+        }
+
         let currentGames = userDefaults.double(forKey: gamesKey)
         let newGames = currentGames + 1
         let newAverage = ((currentAverage * currentGames) + Double(score)) / newGames
