@@ -14,7 +14,7 @@ enum TokenTapResult {
     case mismatch(tDataPair: TokenDataPair)
     case targetMatch(tDataPair: TokenDataPair,
                      rowsCleared: Int,
-                     matchValue: Int)
+                     rowBonus: RowBonus)
 }
 
 class MenuButton: UIButton {
@@ -284,12 +284,18 @@ class GameViewController: UIViewController {
             return
         }
 
-        hideLevelIntro(completion: startAddingRows)
+        hideLevelIntro {
+            self.startAddingRows()
+        }
     }
 
-    func startAddingRows() {
+    func startAddingRows(forEmpty: Bool = true) {
         addRowCount = 1
-        addRow()
+
+        if forEmpty {
+            addRow()
+        }
+
         startAddRowTimer()
     }
 
@@ -386,27 +392,28 @@ class GameViewController: UIViewController {
     }
 
     func checkForTargetMatch(_ result: TokenTapResult) {
-        guard case TokenTapResult.targetMatch(_, let rowsCleared, let matchValue) = result else {
+        guard case TokenTapResult.targetMatch(_, let rowsCleared, let rowBonus) = result else {
             return
         }
 
         levelProgressView.update(count: rowsCleared)
 
-        gameData.score += matchValue
+        gameData.score += Constants.baseRowValue + rowBonus.rawValue
         scoreView.value = gameData.score
 
         if rowsCleared == Constants.levelRowTarget {
             endLevel()
-        } else if gameData.rows.isEmpty {
-            resetRowAdding()
+        } else if gameData.rows.isEmpty || rowBonus != .none {
+            resetRowAdding(forEmpty: gameData.rows.isEmpty)
         }
     }
 
-    func resetRowAdding() {
+    func resetRowAdding(forEmpty: Bool) {
         addRowTimer?.invalidate()
         timerView.update(count: 0)
-        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1),
-                                      execute: startAddingRows)
+        DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
+            self.startAddingRows(forEmpty: forEmpty)
+        }
     }
 
     func endLevel() {

@@ -71,6 +71,21 @@ extension UIView {
         }
     }
 
+    static func flashSequence(views: [UIView]) -> [AnimationItem] {
+        var sequence = [AnimationItem]()
+
+        for index in 0 ... 7 {
+            let animation: AnimationItem = (0.15, {
+                views.forEach {
+                    $0.alpha = CGFloat(index % 2)
+                }
+            })
+            sequence.append(animation)
+        }
+
+        return sequence
+    }
+
     func addNoMaskSubviews(_ views: [UIView]) {
         for view in views {
             view.translatesAutoresizingMaskIntoConstraints = false

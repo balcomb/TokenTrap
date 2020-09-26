@@ -76,23 +76,9 @@ class IndicatorView: UIView {
         }
     }
 
-    func flash(index: Int = 0, completion: @escaping () -> Void) {
-        let animation = {
-            self.indicators.forEach {
-                $0.alpha = CGFloat(index % 2)
-            }
-        }
-
-        UIView.animate(withDuration: 0.2,
-                       animations: animation) { _ in
-
-            guard index < 7 else {
-                completion()
-                return
-            }
-
-            self.flash(index: index + 1, completion: completion)
-        }
+    func flash(completion: @escaping () -> Void) {
+        let flashSequence = UIView.flashSequence(views: indicators)
+        UIView.executeAnimationSequence(flashSequence, completion: completion)
     }
 }
 

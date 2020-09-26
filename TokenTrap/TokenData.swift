@@ -20,9 +20,8 @@ class TokenData: Equatable {
     var attributes: TokenAttributes
     var id = TokenID.notSet
     var isWildcard = false
-    var isWildcardRow = false
-    var isUniformRow = false
     var isTrainingHelper = false
+    var rowBonus = RowBonus.none
 
     init(attributes: TokenAttributes) {
         self.attributes = attributes
@@ -58,14 +57,19 @@ class TokenData: Equatable {
 typealias TokenDataRow = [TokenData]
 extension TokenDataRow {
 
+    var bonus: RowBonus {
+        guard let firstTData = first else { return .none }
+        return firstTData.rowBonus
+    }
+
     var isChallengeRow: Bool {
         guard let firstTData = first else { return false }
-        return firstTData.isWildcardRow || firstTData.isUniformRow
+        return firstTData.rowBonus != .none
     }
 
     func setAllWildcards() {
         forEach { $0.isWildcard = true }
-        first?.isWildcardRow = true
+        first?.rowBonus = .wildcard
     }
 
     func addRandomWildcard() {
@@ -105,7 +109,7 @@ extension TokenDataRow {
 
     static func uniformRow() -> TokenDataRow {
         let firstTData = TokenData.random()
-        firstTData.isUniformRow = true
+        firstTData.rowBonus = .uniform
         var row = [firstTData]
 
         while row.count < Constants.gridSize {
@@ -269,17 +273,17 @@ class GameData {
         return nil
     }
 
-    func removeRowForMatch(tokenID: TokenID) {
+    func removeRowForMatch(tokenID: TokenID) -> TokenDataRow {
         guard let index = rowIndexForID(tokenID) else {
             // TODO: end game?
-            return
+            return []
         }
 
         for tData in rows[index] {
             tDataMap.removeValue(forKey: tData.id)
         }
 
-        rows.remove(at: index)
+        return rows.remove(at: index)
     }
 
     func processTokenTap(tokenID: TokenID) -> TokenTapResult? {
@@ -311,11 +315,11 @@ class GameData {
             return .partialMatch(tDataPair: tDataPair)
         case .adjacentInRow:
             if tDataPair.tData1.attributes == targetAttributes {
-                removeRowForMatch(tokenID: tDataPair.tData1.id)
+                let row = removeRowForMatch(tokenID: tDataPair.tData1.id)
                 rowsCleared += 1
                 return .targetMatch(tDataPair: tDataPair,
                                     rowsCleared: rowsCleared,
-                                    matchValue: Constants.baseRowValue)
+                                    rowBonus: row.bonus)
             } else {
                 return .partialMatch(tDataPair: tDataPair)
             }
@@ -370,6 +374,12 @@ class GameData {
 
         return tokenIDs
     }
+}
+
+enum RowBonus: Int {
+    case none = 0
+    case uniform = 10
+    case wildcard = 20
 }
 
 enum TokenPairRelation {

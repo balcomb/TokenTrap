@@ -241,6 +241,7 @@ class GridView: UIView {
     }
 
     func hideRow(_ row: GridRow,
+                 rowBonus: RowBonus,
                  completion: @escaping () -> Void) {
         guard let constraints = tokenConstraints[row.tViewPrime.id] else { return }
 
@@ -249,13 +250,43 @@ class GridView: UIView {
         let slideOutRow: AnimationItem = (0.3, {
             self.layoutIfNeeded()
         })
+
+        var animations = [slideOutRow]
+
+        let bonusLabel = createBonusLabel(row: row, rowBonus: rowBonus)
+
+        if let bonusLabel = bonusLabel {
+            let flashSequence = UIView.flashSequence(views: [bonusLabel])
+            animations.append(contentsOf: flashSequence)
+        }
+
         let shiftRowsAbove: AnimationItem = (0.3, {
+            bonusLabel?.alpha = 0
             self.shiftRowsAbove(row: row)
         })
-        UIView.executeAnimationSequence([slideOutRow,
-                                         shiftRowsAbove]) {
+        animations.append(shiftRowsAbove)
+
+        UIView.executeAnimationSequence(animations) {
+            bonusLabel?.removeFromSuperview()
             completion()
         }
+    }
+
+    func createBonusLabel(row: GridRow, rowBonus: RowBonus) -> UILabel? {
+        guard rowBonus != .none else {
+            return nil
+        }
+
+        let label = UILabel()
+        label.alpha = 0
+        label.font = .systemFont(ofSize: row.tViewPrime.frame.size.height * 0.7,
+                                 weight: .heavy)
+        label.text = "+" + String(rowBonus.rawValue)
+        label.textColor = .gold
+        addNoMaskSubviews([label])
+        NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: centerXAnchor),
+                                     label.centerYAnchor.constraint(equalTo: row.tViewPrime.centerYAnchor)])
+        return label
     }
 
     func shiftRowsAbove(row: GridRow) {
@@ -297,8 +328,8 @@ class GridView: UIView {
             updateForMismatch(tDataPair)
         case .partialMatch(let tDataPair):
             updateForPartialMatch(tDataPair)
-        case .targetMatch(let tDataPair, _, _):
-            updateForTargetMatch(tDataPair)
+        case .targetMatch(let tDataPair, _, let rowBonus):
+            updateForTargetMatch(tDataPair, rowBonus: rowBonus)
         }
     }
 
@@ -320,19 +351,19 @@ class GridView: UIView {
         tViewMap.tokenViewPair(forDataPair: tDataPair)?.update(withData: tDataPair.tData1)
     }
 
-    func updateForTargetMatch(_ tDataPair: TokenDataPair) {
+    func updateForTargetMatch(_ tDataPair: TokenDataPair, rowBonus: RowBonus) {
         tViewMap.tokenViewPair(forDataPair: tDataPair)?.update(withData: tDataPair.tData1,
                                                                highlight: .targetMatch) {
             DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .milliseconds(300)) {
-                self.removeRow(tokenID: tDataPair.tData1.id)
+                self.removeRow(tokenID: tDataPair.tData1.id, rowBonus: rowBonus)
             }
         }
     }
 
-    func removeRow(tokenID: TokenID) {
+    func removeRow(tokenID: TokenID, rowBonus: RowBonus) {
         guard let row = rowForID(tokenID: tokenID) else { return }
 
-        hideRow(row) {
+        hideRow(row, rowBonus: rowBonus) {
             self.cleanUpHiddenRow(row)
         }
     }
