@@ -31,9 +31,31 @@ class TokenData: Equatable {
         TokenData(attributes: (TokenColor.random(), TokenIcon.random()))
     }
 
-    static func randomKeySequence(attributes: TokenAttributes) -> [TokenData] {
+    static func randomKeySequence(attributes: TokenAttributes,
+                                  disguiseType: DisguiseType = .none) -> [TokenData] {
         let pair = Self.randomKeyPair(attributes: attributes)
-        return [pair.0, pair.1]
+
+        switch disguiseType {
+        case .none:
+            return [pair.0, pair.1]
+        case .single:
+            return singleDisguisedSequence(keyPair: pair)
+        case .double:
+            return doubleDisguiseSequence(keyPair: pair)
+        }
+    }
+
+    static func doubleDisguiseSequence(keyPair: (TokenData, TokenData)) -> [TokenData] {
+        let disguisePair0 = randomKeyPair(attributes: keyPair.0.attributes)
+        let disguisePair1 = randomKeyPair(attributes: keyPair.1.attributes)
+        return [disguisePair0.0, disguisePair0.1, disguisePair1.0, disguisePair1.1]
+    }
+
+    static func singleDisguisedSequence(keyPair: (TokenData, TokenData)) -> [TokenData] {
+        let disguisePair = randomKeyPair(attributes: keyPair.0.attributes)
+        let rawSequence = [[keyPair.1], [disguisePair.0, disguisePair.1]]
+        let flattenedSequence = rawSequence.shuffled().joined()
+        return [TokenData](flattenedSequence)
     }
 
     static func randomKeyPair(attributes: TokenAttributes) -> (TokenData, TokenData) {
@@ -108,9 +130,11 @@ extension TokenDataRow {
     }
 
     static func standardRow(targetAttributes: TokenAttributes,
+                            disguiseType: DisguiseType,
                             trainingModeOn: Bool) -> TokenDataRow {
         var row = TokenDataRow()
-        var keySequence = TokenData.randomKeySequence(attributes: targetAttributes)
+        var keySequence = TokenData.randomKeySequence(attributes: targetAttributes,
+                                                      disguiseType: disguiseType)
         keySequence.assignTrainingHelper(trainingModeOn)
         let keyStartIndexUpperBound = Constants.gridSize - keySequence.count + 1
         let keyStartIndex = arc4random_uniform(UInt32(keyStartIndexUpperBound))
@@ -253,7 +277,9 @@ class GameData {
         if let allMatchesRow = buildAllMatchesRow() {
             row = allMatchesRow
         } else {
+            let disguiseType = DisguiseType(level: level, expertModeOn: expertModeOn)
             row = TokenDataRow.standardRow(targetAttributes: targetAttributes,
+                                           disguiseType: disguiseType,
                                            trainingModeOn: trainingModeOn)
         }
 
@@ -408,6 +434,22 @@ class GameData {
         }
 
         return tokenIDs
+    }
+}
+
+enum DisguiseType {
+    case none
+    case single
+    case double
+
+    init(level: Int, expertModeOn: Bool) {
+        if expertModeOn || level > 2 {
+            self = fiftyFifty ? .single : .double
+        } else if level == 2 {
+            self = .single
+        } else {
+            self = .none
+        }
     }
 }
 
