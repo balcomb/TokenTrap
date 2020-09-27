@@ -86,16 +86,34 @@ extension TokenDataRow {
         return nil
     }
 
+    func assignTrainingHelper(_ trainingModeOn: Bool) {
+        if trainingModeOn {
+            randomElement()?.isTrainingHelper = true
+        }
+    }
+
+    static func allMatchesRow(targetAttributes: TokenAttributes,
+                              trainingModeOn: Bool) -> TokenDataRow {
+        let keyPair = TokenData.randomKeyPair(attributes: targetAttributes)
+        let keySequence = TokenData.randomKeySequence(attributes: keyPair.0.attributes)
+                            + TokenData.randomKeySequence(attributes: keyPair.1.attributes)
+        keySequence.assignTrainingHelper(trainingModeOn)
+
+        let randomKeyPair1 = TokenData.randomKeySequence(attributes: TokenData.random().attributes)
+        let randomKeyPair2 = TokenData.randomKeySequence(attributes: TokenData.random().attributes)
+
+        let subSequences = [keySequence, randomKeyPair1, randomKeyPair2]
+
+        return TokenDataRow(subSequences.shuffled().joined())
+    }
+
     static func standardRow(targetAttributes: TokenAttributes,
                             trainingModeOn: Bool) -> TokenDataRow {
         var row = TokenDataRow()
         var keySequence = TokenData.randomKeySequence(attributes: targetAttributes)
+        keySequence.assignTrainingHelper(trainingModeOn)
         let keyStartIndexUpperBound = Constants.gridSize - keySequence.count + 1
         let keyStartIndex = arc4random_uniform(UInt32(keyStartIndexUpperBound))
-
-        if trainingModeOn {
-            keySequence.randomElement()?.isTrainingHelper = true
-        }
 
         for index in 0 ..< Constants.gridSize {
             let tData = index >= keyStartIndex && !keySequence.isEmpty
@@ -230,10 +248,27 @@ class GameData {
             return uniformRow
         }
 
-        let row = TokenDataRow.standardRow(targetAttributes: targetAttributes,
+        let row: TokenDataRow
+
+        if let allMatchesRow = buildAllMatchesRow() {
+            row = allMatchesRow
+        } else {
+            row = TokenDataRow.standardRow(targetAttributes: targetAttributes,
                                            trainingModeOn: trainingModeOn)
+        }
+
         addWildcards(row)
         return row
+    }
+
+    func buildAllMatchesRow() -> TokenDataRow? {
+        guard ((expertModeOn || level > 4) && arc4random_uniform(3) == 0)
+            || (!expertModeOn && level == 4) else {
+            return nil
+        }
+
+        return TokenDataRow.allMatchesRow(targetAttributes: targetAttributes,
+                                          trainingModeOn: trainingModeOn)
     }
 
     func buildUniformRow() -> [TokenData]? {
