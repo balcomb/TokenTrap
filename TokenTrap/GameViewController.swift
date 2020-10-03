@@ -104,23 +104,120 @@ class LevelCompleteLabel: UILabel {
     }
 }
 
+typealias AddRowTimerCallback = (Int) -> Void
+class AddRowTimer {
+
+    init(gameData: GameData,
+         callback: @escaping AddRowTimerCallback) {
+        self.gameData = gameData
+        self.callback = callback
+    }
+
+    let gameData: GameData
+    let callback: AddRowTimerCallback
+
+    var timer: Timer?
+    var count = 0
+
+    var addRowTimerInterval: TimeInterval {
+        let baseInterval = 1.2
+        let lastBaseIntervalLevel = gameData.expertModeOn ? 4 : 8
+        var factor = 1.0
+
+        if !gameData.trainingModeOn
+            && gameData.level > lastBaseIntervalLevel {
+            let exponent = Double(gameData.level - lastBaseIntervalLevel)
+            factor = pow(0.8, exponent)
+        }
+
+        return baseInterval * factor
+    }
+
+    var isValid: Bool {
+        timer?.isValid ?? false
+    }
+
+    func start(shouldPreserveCount: Bool = false) {
+        invalidate()
+
+        if shouldPreserveCount {
+            handleTimer()
+        } else {
+            count = 0
+        }
+
+        timer =  Timer.scheduledTimer(timeInterval: addRowTimerInterval,
+                                      target: self,
+                                      selector: #selector(handleTimer),
+                                      userInfo: nil,
+                                      repeats: true)
+    }
+
+    @objc func handleTimer() {
+        if count == Constants.addRowCountLimit {
+            count = 0
+        } else {
+            count += 1
+        }
+
+        callback(count)
+    }
+
+    func invalidate() {
+        timer?.invalidate()
+    }
+}
+
 class GameViewController: UIViewController {
 
     var gameData = GameData()
 
-    var addRowTimer: Timer?
-    var addRowTimerInterval = 1.2
-    var addRowCount = 1
+    lazy var addRowTimer = AddRowTimer(gameData: gameData,
+                                       callback: addRowTimerCallback)
+    var addRowTimerCallback: AddRowTimerCallback {
+        { [weak self] count in
+            guard let self = self else { return }
+            guard !self.menuIsShowing else {
+                return
+            }
+
+            self.timerView.update(count: count)
+
+            if count == Constants.addRowCountLimit {
+                guard self.gameData.canAddRow else {
+                    self.endGame()
+                    return
+                }
+
+                self.addRow()
+            }
+        }
+    }
 
     var expertModeOn = false
     var trainingModeOn = false
     var gameIsOver = false
+    var shouldRestartTimer = false
 
     var orientationConstraints = ViewConstraints()
 
     var menuIsShowing = false {
         didSet {
             gridView.updateForMenuState(isShowing: menuIsShowing)
+
+            if menuIsShowing {
+                if self.addRowTimer.isValid {
+                    self.addRowTimer.invalidate()
+                    self.shouldRestartTimer = true
+                }
+            } else {
+                self.finishLevelStart()
+
+                if self.shouldRestartTimer {
+                    self.addRowTimer.start(shouldPreserveCount: true)
+                    self.shouldRestartTimer = false
+                }
+            }
         }
     }
 
@@ -290,13 +387,16 @@ class GameViewController: UIViewController {
     }
 
     func startAddingRows(forEmpty: Bool = true) {
-        addRowCount = 1
+        guard !menuIsShowing else {
+            shouldRestartTimer = true
+            return
+        }
 
         if forEmpty {
             addRow()
         }
 
-        startAddRowTimer()
+        addRowTimer.start()
     }
 
     func showLevelIntro() {
@@ -339,39 +439,9 @@ class GameViewController: UIViewController {
         gridView.addRow(gameData.nextRow())
     }
 
-    func startAddRowTimer() {
-        addRowTimer?.invalidate()
-
-        addRowTimer = Timer.scheduledTimer(timeInterval: addRowTimerInterval,
-                                           target: self,
-                                           selector: #selector(handleAddRowTimer),
-                                           userInfo: nil,
-                                           repeats: true)
-    }
-
-    @objc func handleAddRowTimer() {
-        guard !menuIsShowing else {
-            return
-        }
-
-        timerView.update(count: addRowCount)
-
-        if addRowCount == Constants.addRowCountLimit {
-            guard gameData.canAddRow else {
-                endGame()
-                return
-            }
-
-            addRowCount = 0
-            addRow()
-        } else {
-            addRowCount += 1
-        }
-    }
-
     func endGame() {
         gameIsOver = true
-        addRowTimer?.invalidate()
+        addRowTimer.invalidate()
         timerView.updateForGameOver()
         levelProgressView.update(count: 0)
         gridView.blockTokenTaps()
@@ -409,7 +479,7 @@ class GameViewController: UIViewController {
     }
 
     func resetRowAdding(forEmpty: Bool) {
-        addRowTimer?.invalidate()
+        addRowTimer.invalidate()
         timerView.update(count: 0)
         DispatchQueue.main.asyncAfter(deadline: .now() + .seconds(1)) {
             self.startAddingRows(forEmpty: forEmpty)
@@ -417,7 +487,8 @@ class GameViewController: UIViewController {
     }
 
     func endLevel() {
-        addRowTimer?.invalidate()
+        addRowTimer.invalidate()
+        addRowTimer.count = 0
         timerView.update(count: 0)
         gridView.blockTokenTaps()
         levelProgressView.update(count: 10)
@@ -440,12 +511,10 @@ class GameViewController: UIViewController {
         menuIsShowing = true
 
         let endClosure: MenuClosure = { _ in
-            self.addRowTimer?.invalidate()
-            self.dismiss(animated: true, completion: nil)
+            self.dismiss(animated: true)
         }
         let resumeClosure: MenuClosure = { _ in
             self.menuIsShowing = false
-            self.finishLevelStart()
         }
         UIAlertController.showMenuDialog(gameController: self,
                                          endClosure: endClosure,
