@@ -38,7 +38,7 @@ class LearnHowViewController: UIViewController {
 
     lazy var headlineLabel: UILabel = {
         let headlineLabel = self.defaultLabel(text: "TokenTrap is a challenging action-\u{2060}puzzle game requiring logical thinking under pressure")
-        headlineLabel.textColor = .gold
+        headlineLabel.textColor = .targetYellow
         headlineLabel.font = .boldSystemFont(ofSize: 22)
         return headlineLabel
     }()

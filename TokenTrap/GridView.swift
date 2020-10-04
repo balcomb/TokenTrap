@@ -147,12 +147,34 @@ class GridView: UIView {
 
         for index in 0 ..< Constants.gridSize * Constants.gridSize {
             let view = UIView()
-            view.backgroundColor = UIColor.black.withAlphaComponent(0.15)
+            view.backgroundColor = gridBackground
             views.append(view)
         }
 
         return views
     }()
+
+    var containerBackground: UIColor {
+        UIColor { traits -> UIColor in
+            switch traits.userInterfaceStyle {
+            case .dark:
+                return UIColor.white.withAlphaComponent(0.15)
+            default:
+                return UIColor.white.withAlphaComponent(0.1)
+            }
+        }
+    }
+
+    var gridBackground: UIColor {
+        UIColor { traits -> UIColor in
+            switch traits.userInterfaceStyle {
+            case .dark:
+                return UIColor.black.withAlphaComponent(0.4)
+            default:
+                return UIColor.black.withAlphaComponent(0.15)
+            }
+        }
+    }
 
     override func willMove(toSuperview newSuperview: UIView?) {
         super.willMove(toSuperview: newSuperview)
@@ -162,7 +184,7 @@ class GridView: UIView {
         }
 
         layer.masksToBounds = true
-        backgroundColor = UIColor.white.withAlphaComponent(0.1)
+        backgroundColor = containerBackground
         layoutGrid()
         bringSubviewToFront(tViewContainer)
     }
@@ -282,7 +304,7 @@ class GridView: UIView {
         label.font = .systemFont(ofSize: row.tViewPrime.frame.size.height * 0.7,
                                  weight: .heavy)
         label.text = "+" + String(rowBonus.rawValue)
-        label.textColor = .gold
+        label.textColor = .targetYellow
         addNoMaskSubviews([label])
         NSLayoutConstraint.activate([label.centerXAnchor.constraint(equalTo: centerXAnchor),
                                      label.centerYAnchor.constraint(equalTo: row.tViewPrime.centerYAnchor)])

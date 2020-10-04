@@ -14,7 +14,7 @@ class GameOverView: UIView {
 
     lazy var gameOverLabel: UILabel = {
         let label = UILabel()
-        label.textColor = .gold
+        label.textColor = .targetYellow
         label.font = .systemFont(ofSize: 24,
                                  weight: .heavy)
         return label

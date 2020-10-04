@@ -128,9 +128,6 @@ extension MenuIcon {
 }
 
 extension UIColor {
-    open class var gold: UIColor {
-        UIColor(named: "gold")!
-    }
     open class var background: UIColor {
         UIColor(named: "background")!
     }
