@@ -21,13 +21,14 @@ struct ViewConstraints {
     }
 
     mutating func updateForOrientation() {
-        let orientation = UIApplication.shared.statusBarOrientation
-        let isLandscape = orientation == .landscapeLeft || orientation == .landscapeRight
+        if let orientation = UIApplication.shared.windows.first?.windowScene?.interfaceOrientation {
+            let isLandscape = orientation == .landscapeLeft || orientation == .landscapeRight
 
-        if isLandscape {
-            update(landscapeConstraints)
-        } else {
-            update(portraitConstraints)
+            if isLandscape {
+                update(landscapeConstraints)
+            } else {
+                update(portraitConstraints)
+            }
         }
     }
 
